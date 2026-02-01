@@ -2,43 +2,35 @@ import { FadeIn } from "@/components/FadeIn";
 
 interface Project {
   title: string;
-  problem: string;
+  description: string;
   approach: string;
   technologies: string[];
 }
 
 const projects: Project[] = [
   {
-    title: "Multi-Region Kubernetes Platform",
-    problem:
-      "Legacy deployment process required manual intervention across three data centers, causing 4-hour deployment windows and frequent rollback failures.",
+    title: "GreenplateAi",
+    description:
+      "An evolving platform foundation used as a deliberate practice environment to explore system design, automation, and scalable architecture across frontend, backend, and cloud infrastructure.",
     approach:
-      "Designed a GitOps-based platform using Kubernetes and ArgoCD with automated canary deployments. Built custom controllers for cross-region traffic shifting and implemented progressive delivery pipelines that reduced deployment risk.",
-    technologies: ["Kubernetes", "ArgoCD", "Istio", "Go", "Terraform"],
+      "Iterating on real deployment pipelines, refining infrastructure patterns, and validating architectural decisions through hands-on implementation. Each iteration surfaces new constraints and informs the next design cycle.",
+    technologies: ["Azure", "Terraform", "TypeScript", "React", "PostgreSQL", "GitHub Actions"],
   },
   {
-    title: "Observability Infrastructure",
-    problem:
-      "Distributed system with 200+ microservices lacked unified visibility. Teams operated in silos with inconsistent logging and no correlation between traces, metrics, and logs.",
+    title: "Azure Networking Labs",
+    description:
+      "Reproducible Azure networking labs used to validate enterprise WAN, routing, DNS, and application delivery patterns through infrastructure as code and automation.",
     approach:
-      "Built a centralized observability stack with OpenTelemetry instrumentation. Designed custom dashboards and alerting hierarchies that reduced mean-time-to-detection from 45 minutes to under 3 minutes.",
-    technologies: ["OpenTelemetry", "Prometheus", "Grafana", "Loki", "Python"],
+      "Building isolated lab environments to test hub-spoke topologies, DNS resolution flows, and traffic routing behaviors. Each lab reinforces networking fundamentals while exploring edge cases in real infrastructure.",
+    technologies: ["Azure", "Terraform", "Virtual WAN", "Private DNS", "Application Gateway", "Bicep"],
   },
   {
-    title: "Developer Platform & Internal Tooling",
-    problem:
-      "Engineering teams spent 30% of their time on infrastructure tasks. No self-service capabilities for database provisioning, secrets management, or environment creation.",
+    title: "Internal Tooling & Automation",
+    description:
+      "Internal tools and workflows built to reduce operational friction, accelerate diagnosis, and refine platform and systems engineering practices.",
     approach:
-      "Created an internal developer platform with Backstage, abstracting infrastructure complexity behind service templates. Teams now provision complete environments in minutes with full compliance guardrails.",
-    technologies: ["Backstage", "Crossplane", "Vault", "PostgreSQL", "TypeScript"],
-  },
-  {
-    title: "Zero-Trust Network Architecture",
-    problem:
-      "Flat network topology with perimeter-based security. Lateral movement risk was high, and compliance audits repeatedly flagged segmentation gaps.",
-    approach:
-      "Implemented service mesh with mTLS everywhere. Designed identity-based access policies that replaced IP-based rules. Achieved SOC 2 compliance with automated policy enforcement.",
-    technologies: ["Cilium", "SPIFFE/SPIRE", "Envoy", "OPA", "Terraform"],
+      "Developing CLI utilities, automation scripts, and monitoring integrations that address recurring operational patterns. Focus on reducing toil and improving clarity during incident response and infrastructure changes.",
+    technologies: ["Python", "PowerShell", "Azure CLI", "Prometheus", "Grafana"],
   },
 ];
 
@@ -50,8 +42,8 @@ export default function Projects() {
           Projects
         </h1>
         <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
-          Selected engineering work focused on platform infrastructure, 
-          developer experience, and systems reliability.
+          Engineering systems and practice environments focused on architectural 
+          exploration, iteration, and learning through real constraints.
         </p>
       </FadeIn>
 
@@ -65,10 +57,7 @@ export default function Projects() {
 
               <div className="mt-6 space-y-4">
                 <div>
-                  <h3 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-                    Problem
-                  </h3>
-                  <p className="mt-2 text-foreground/90">{project.problem}</p>
+                  <p className="text-foreground/90">{project.description}</p>
                 </div>
 
                 <div>

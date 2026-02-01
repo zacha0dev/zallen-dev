@@ -12,22 +12,22 @@ export default function About() {
       <FadeIn delay={100}>
         <div className="mt-12 max-w-2xl space-y-6 text-lg leading-relaxed text-foreground/90">
           <p>
-            I'm a platform engineer with eight years of experience building and 
-            operating infrastructure at scale. My focus is on Kubernetes platforms, 
-            developer tooling, and the systems that enable engineering organizations 
-            to ship reliably.
+            I'm a cloud and platform engineer focused on Azure networking, 
+            infrastructure automation, and the systems that enable engineering 
+            teams to ship reliably. My work emphasizes end-to-end ownership—from 
+            network architecture to deployment pipelines.
           </p>
           <p>
-            Previously, I led platform initiatives at companies ranging from 
-            Series B startups to enterprise organizations. I care about reducing 
-            operational burden, designing for failure, and creating systems that 
-            teams can understand and maintain.
+            I stay sharp by building. Practice environments, networking labs, 
+            and internal tooling keep my hands in real infrastructure while 
+            exploring patterns that scale. Curiosity drives the work; iteration 
+            refines the judgment.
           </p>
           <p>
-            I approach infrastructure as a product discipline—understanding user 
-            needs, making deliberate tradeoffs, and measuring outcomes. The best 
-            platform work disappears into the background, enabling others to move 
-            faster without thinking about it.
+            Systems thinking shapes how I approach problems—understanding 
+            dependencies, anticipating failure modes, and designing for 
+            operational clarity. The best platform work disappears into the 
+            background, enabling others to move faster without thinking about it.
           </p>
         </div>
       </FadeIn>

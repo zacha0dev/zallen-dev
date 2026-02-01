@@ -13,9 +13,9 @@ export default function Resume() {
       <FadeIn delay={100}>
         <div className="mt-12 max-w-2xl">
           <p className="text-lg leading-relaxed text-foreground/90">
-            Cloud and platform engineer specializing in Kubernetes infrastructure, 
-            developer platforms, and distributed systems reliability. Eight years 
-            of experience designing systems that scale from startup to enterprise.
+            Cloud and platform engineer with depth in Azure networking, 
+            infrastructure automation, and systems design. Focused on building 
+            foundations that scale cleanly and remain stable under pressure.
           </p>
 
           <a
@@ -26,7 +26,7 @@ export default function Resume() {
             <FileText className="h-5 w-5 text-muted-foreground" />
             <div>
               <p className="font-medium">Download Resume</p>
-              <p className="text-sm text-muted-foreground">PDF, 85 KB</p>
+              <p className="text-sm text-muted-foreground">PDF</p>
             </div>
           </a>
         </div>
