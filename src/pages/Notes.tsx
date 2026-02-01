@@ -1,4 +1,5 @@
 import { FadeIn } from "@/components/FadeIn";
+import { NavLink } from "@/components/NavLink";
 
 interface Note {
   title: string;
@@ -12,6 +13,12 @@ const notes: Note[] = [
     date: "January 2026",
     content:
       "Building platform foundations without immediate user pressure creates space for architectural clarity. The tradeoff is real: without feedback loops, it's easy to over-engineer or optimize for the wrong constraints. But there's value in treating early systems as deliberate practice—making decisions, observing consequences, and refining judgment through iteration. The goal isn't perfection before launch; it's developing the instincts to recognize good structure when it matters.",
+  },
+  {
+    title: "The cost of not automating",
+    date: "December 2025",
+    content:
+      "Manual processes have hidden costs beyond time. Each repetition reinforces muscle memory for the wrong things—clicking through consoles instead of reasoning about systems. Automation isn't just efficiency; it's forcing clarity about what a process actually does. Writing a script requires understanding every step. The script becomes documentation, the execution becomes repeatable, and the knowledge transfers beyond individual memory.",
   },
 ];
 
@@ -43,6 +50,21 @@ export default function Notes() {
           </FadeIn>
         ))}
       </div>
+
+      <FadeIn delay={300}>
+        <div className="mt-16 pt-8 border-t border-border">
+          <p className="text-muted-foreground">
+            See also:{" "}
+            <NavLink
+              to="/decisions"
+              className="text-foreground hover:text-accent transition-colors underline underline-offset-4"
+            >
+              Decision Log
+            </NavLink>
+            {" "}— specific technical decisions with context and outcomes.
+          </p>
+        </div>
+      </FadeIn>
     </section>
   );
 }
