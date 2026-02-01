@@ -8,22 +8,10 @@ interface Note {
 
 const notes: Note[] = [
   {
-    title: "On Platform Team Incentives",
+    title: "Designing systems before users exist",
     date: "January 2026",
     content:
-      "Platform teams succeed when they measure adoption, not just uptime. The best infrastructure work is invisible—teams use it without thinking about it. This requires treating internal developers as customers, not captive users. We started tracking 'time to first deployment' for new engineers and saw more meaningful improvements than any SLA dashboard could show.",
-  },
-  {
-    title: "Why We Chose Cilium Over Istio",
-    date: "November 2025",
-    content:
-      "The decision came down to operational complexity. Istio's feature set was impressive, but our team of three couldn't sustain the maintenance burden. Cilium's eBPF foundation meant fewer moving parts and better performance at our scale. Sometimes the right choice is the one you can actually operate.",
-  },
-  {
-    title: "Lessons from a Production Incident",
-    date: "September 2025",
-    content:
-      "A cascading failure taught us that circuit breakers without proper timeout coordination create worse outcomes than no circuit breakers at all. We spent two weeks redesigning our retry and backoff strategies across 40 services. The documentation we wrote became the most-read page in our internal wiki.",
+      "Building platform foundations without immediate user pressure creates space for architectural clarity. The tradeoff is real: without feedback loops, it's easy to over-engineer or optimize for the wrong constraints. But there's value in treating early systems as deliberate practice—making decisions, observing consequences, and refining judgment through iteration. The goal isn't perfection before launch; it's developing the instincts to recognize good structure when it matters.",
   },
 ];
 
@@ -35,8 +23,8 @@ export default function Notes() {
           Notes
         </h1>
         <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
-          Brief reflections on architecture decisions, operational lessons, 
-          and the craft of building reliable systems.
+          Reflections on architectural decisions, system tradeoffs, 
+          and the practice of building reliable infrastructure.
         </p>
       </FadeIn>
 

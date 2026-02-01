@@ -16,7 +16,7 @@ export function Header() {
           to="/"
           className="text-lg font-medium tracking-tight text-foreground hover:text-accent transition-colors"
         >
-          JD
+          ZA
         </NavLink>
 
         <ul className="flex items-center gap-8">

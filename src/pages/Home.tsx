@@ -5,7 +5,7 @@ export default function Home() {
     <section className="container flex min-h-[calc(100vh-5rem)] flex-col justify-center">
       <FadeIn>
         <h1 className="text-5xl font-semibold tracking-tight sm:text-6xl md:text-7xl">
-          Jordan Davis
+          Zachary Allen
         </h1>
       </FadeIn>
 
@@ -18,9 +18,9 @@ export default function Home() {
 
       <FadeIn delay={200}>
         <p className="mt-8 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-          I design and operate the systems that other teams build on. My work 
-          focuses on infrastructure that scales, platforms that enable velocity, 
-          and architectures that remain stable under pressure.
+          I design and operate production systems that other teams build on. My work 
+          focuses on cloud foundations, platform workflows, and architectures that 
+          scale cleanly while remaining stable under pressure.
         </p>
       </FadeIn>
     </section>
