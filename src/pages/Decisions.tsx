@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { StaggerContainer, StaggerItem } from "@/components/StaggerContainer";
 
 interface Decision {
   title: string;
@@ -52,6 +51,29 @@ const decisions: Decision[] = [
   },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: "easeOut" as const,
+    },
+  },
+};
+
 export default function Decisions() {
   return (
     <section className="container py-16">
@@ -68,47 +90,54 @@ export default function Decisions() {
         </p>
       </motion.div>
 
-      <StaggerContainer className="mt-16 space-y-12" staggerDelay={0.1}>
+      <motion.div
+        className="mt-16 space-y-12"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {decisions.map((decision) => (
-          <StaggerItem key={decision.title}>
-            <article className="border-l-2 border-border pl-6 space-y-4 hover:border-accent/50 transition-colors">
+          <motion.article
+            key={decision.title}
+            className="border-l-2 border-border pl-6 space-y-4 hover:border-accent/50 transition-colors"
+            variants={itemVariants}
+          >
+            <div>
+              <time className="text-sm text-muted-foreground">
+                {decision.date}
+              </time>
+              <h2 className="mt-2 text-xl font-medium tracking-tight text-foreground">
+                {decision.title}
+              </h2>
+            </div>
+
+            <div className="space-y-3 text-foreground/90 leading-relaxed">
               <div>
-                <time className="text-sm text-muted-foreground">
-                  {decision.date}
-                </time>
-                <h2 className="mt-2 text-xl font-medium tracking-tight text-foreground">
-                  {decision.title}
-                </h2>
+                <span className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+                  Context
+                </span>
+                <p className="mt-1">{decision.context}</p>
               </div>
 
-              <div className="space-y-3 text-foreground/90 leading-relaxed">
-                <div>
-                  <span className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-                    Context
-                  </span>
-                  <p className="mt-1">{decision.context}</p>
-                </div>
-
-                <div>
-                  <span className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-                    Decision
-                  </span>
-                  <p className="mt-1">{decision.decision}</p>
-                </div>
-
-                {decision.outcome && (
-                  <div>
-                    <span className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-                      Outcome
-                    </span>
-                    <p className="mt-1">{decision.outcome}</p>
-                  </div>
-                )}
+              <div>
+                <span className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+                  Decision
+                </span>
+                <p className="mt-1">{decision.decision}</p>
               </div>
-            </article>
-          </StaggerItem>
+
+              {decision.outcome && (
+                <div>
+                  <span className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+                    Outcome
+                  </span>
+                  <p className="mt-1">{decision.outcome}</p>
+                </div>
+              )}
+            </div>
+          </motion.article>
         ))}
-      </StaggerContainer>
+      </motion.div>
     </section>
   );
 }
