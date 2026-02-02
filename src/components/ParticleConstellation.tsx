@@ -34,13 +34,13 @@ export function ParticleConstellation() {
       const particleCount = Math.floor((window.innerWidth * window.innerHeight) / 25000);
       const particles: Particle[] = [];
       
-      for (let i = 0; i < Math.min(particleCount, 60); i++) {
+      for (let i = 0; i < Math.min(particleCount, 50); i++) {
         particles.push({
           x: Math.random() * window.innerWidth,
           y: Math.random() * window.innerHeight,
-          vx: (Math.random() - 0.5) * 0.3,
-          vy: (Math.random() - 0.5) * 0.3,
-          radius: Math.random() * 1.5 + 0.5,
+          vx: (Math.random() - 0.5) * 0.25,
+          vy: (Math.random() - 0.5) * 0.25,
+          radius: Math.random() * 2 + 1,
         });
       }
       
@@ -75,7 +75,7 @@ export function ParticleConstellation() {
         // Draw particle
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(232, 228, 223, 0.4)";
+        ctx.fillStyle = "rgba(232, 228, 223, 0.8)";
         ctx.fill();
       });
       
@@ -87,12 +87,12 @@ export function ParticleConstellation() {
           const distance = Math.sqrt(dx * dx + dy * dy);
           
           if (distance < connectionDistance) {
-            const opacity = (1 - distance / connectionDistance) * 0.15;
+            const opacity = (1 - distance / connectionDistance) * 0.35;
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
             ctx.strokeStyle = `rgba(232, 228, 223, ${opacity})`;
-            ctx.lineWidth = 0.5;
+            ctx.lineWidth = 1;
             ctx.stroke();
           }
         }
@@ -105,12 +105,12 @@ export function ParticleConstellation() {
         const mDistance = Math.sqrt(mdx * mdx + mdy * mdy);
         
         if (mDistance < mouseDistance && mDistance > 0) {
-          const opacity = (1 - mDistance / mouseDistance) * 0.2;
+          const opacity = (1 - mDistance / mouseDistance) * 0.4;
           ctx.beginPath();
           ctx.moveTo(particles[i].x, particles[i].y);
           ctx.lineTo(mx, my);
           ctx.strokeStyle = `rgba(232, 228, 223, ${opacity})`;
-          ctx.lineWidth = 0.5;
+          ctx.lineWidth = 1;
           ctx.stroke();
         }
       }
@@ -151,7 +151,6 @@ export function ParticleConstellation() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-0"
-      style={{ opacity: 0.6 }}
     />
   );
 }
