@@ -22,7 +22,7 @@ export default function About() {
         <p>
           I'm a cloud and platform engineer focused on Azure networking, 
           infrastructure automation, and the systems that enable engineering 
-          teams to ship reliably. My work emphasizes end-to-end ownership—from 
+          teams to ship reliably. My work emphasizes end-to-end ownership - from 
           network architecture to deployment pipelines.
         </p>
         <p>
@@ -32,7 +32,7 @@ export default function About() {
           refines the judgment.
         </p>
         <p>
-          Systems thinking shapes how I approach problems—understanding 
+          Systems thinking shapes how I approach problems - understanding 
           dependencies, anticipating failure modes, and designing for 
           operational clarity. The best platform work disappears into the 
           background, enabling others to move faster without thinking about it.

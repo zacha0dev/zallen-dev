@@ -63,7 +63,7 @@ export default function HowIWork() {
               will maintain this in two years?
             </p>
             <p>
-              The goal isn't to eliminate uncertainty—that's usually impossible—but 
+              The goal isn't to eliminate uncertainty - that's usually impossible - but 
               to identify which uncertainties matter most and reduce those first.
             </p>
           </div>
@@ -98,7 +98,7 @@ export default function HowIWork() {
           </h2>
           <div className="text-foreground/90 leading-relaxed space-y-4">
             <p>
-              Speed and correctness aren't always in tension—often, moving 
+              Speed and correctness aren't always in tension - often, moving 
               carefully is faster than cleaning up mistakes. But when they do 
               conflict, context determines the balance.
             </p>
@@ -154,7 +154,7 @@ export default function HowIWork() {
             <p>
               Learning happens best through deliberate practice with real 
               constraints. That's why I maintain personal projects and lab 
-              environments—not as hobbies, but as controlled spaces to develop 
+              environments - not as hobbies, but as controlled spaces to develop 
               and validate new skills before they're needed in production.
             </p>
           </div>
