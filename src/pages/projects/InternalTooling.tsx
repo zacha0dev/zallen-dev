@@ -1,16 +1,21 @@
-import { FadeIn } from "@/components/FadeIn";
+import { motion } from "framer-motion";
 import { NavLink } from "@/components/NavLink";
 import { ArrowLeft } from "lucide-react";
+import { StaggerContainer, StaggerItem } from "@/components/StaggerContainer";
 
 export default function InternalToolingArchitecture() {
   return (
     <section className="container py-16">
-      <FadeIn>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
         <NavLink
           to="/projects"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8 group"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
           Back to Projects
         </NavLink>
 
@@ -20,10 +25,10 @@ export default function InternalToolingArchitecture() {
         <p className="mt-4 text-lg text-muted-foreground">
           Architecture Notes
         </p>
-      </FadeIn>
+      </motion.div>
 
-      <div className="mt-16 space-y-12">
-        <FadeIn delay={100}>
+      <StaggerContainer className="mt-16 space-y-12" staggerDelay={0.1}>
+        <StaggerItem>
           <article className="space-y-4">
             <h2 className="text-xl font-medium tracking-tight text-foreground">
               Problem Constraints
@@ -42,46 +47,46 @@ export default function InternalToolingArchitecture() {
               </p>
             </div>
           </article>
-        </FadeIn>
+        </StaggerItem>
 
-        <FadeIn delay={200}>
+        <StaggerItem>
           <article className="space-y-4">
             <h2 className="text-xl font-medium tracking-tight text-foreground">
               Key Design Decisions
             </h2>
             <ul className="space-y-4 text-foreground/90 leading-relaxed">
-              <li className="border-l-2 border-border pl-4">
+              <li className="border-l-2 border-border pl-4 hover:border-accent/50 transition-colors">
                 <strong className="text-foreground">Boring technology choices.</strong>{" "}
                 Python for CLI tools (ubiquitous, readable), PowerShell for Windows/Azure 
                 integration (native support), shell scripts for simple glue. No exotic 
                 languages that require special knowledge to maintain.
               </li>
-              <li className="border-l-2 border-border pl-4">
+              <li className="border-l-2 border-border pl-4 hover:border-accent/50 transition-colors">
                 <strong className="text-foreground">Self-documenting where possible.</strong>{" "}
                 Tools include help text, examples, and dry-run modes. Documentation 
                 that requires separate maintenance always drifts from reality.
               </li>
-              <li className="border-l-2 border-border pl-4">
+              <li className="border-l-2 border-border pl-4 hover:border-accent/50 transition-colors">
                 <strong className="text-foreground">Fail loudly and clearly.</strong>{" "}
                 Error messages explain what went wrong, what the tool expected, and 
                 what to try next. Silent failures are the enemy of operational clarity.
               </li>
-              <li className="border-l-2 border-border pl-4">
+              <li className="border-l-2 border-border pl-4 hover:border-accent/50 transition-colors">
                 <strong className="text-foreground">Composable over comprehensive.</strong>{" "}
                 Small tools that do one thing well, designed to work together. A Swiss 
                 Army knife is useful; a tool that tries to be everything becomes nothing.
               </li>
             </ul>
           </article>
-        </FadeIn>
+        </StaggerItem>
 
-        <FadeIn delay={300}>
+        <StaggerItem>
           <article className="space-y-4">
             <h2 className="text-xl font-medium tracking-tight text-foreground">
               Tradeoffs Considered
             </h2>
             <div className="space-y-4 text-foreground/90 leading-relaxed">
-              <div className="border-l-2 border-border pl-4">
+              <div className="border-l-2 border-border pl-4 hover:border-accent/50 transition-colors">
                 <p className="font-medium text-foreground">CLI vs. Web Dashboard</p>
                 <p className="mt-1">
                   CLI tools for automation and power users, simple web dashboards 
@@ -90,7 +95,7 @@ export default function InternalToolingArchitecture() {
                   speed.
                 </p>
               </div>
-              <div className="border-l-2 border-border pl-4">
+              <div className="border-l-2 border-border pl-4 hover:border-accent/50 transition-colors">
                 <p className="font-medium text-foreground">Pull vs. Push Metrics</p>
                 <p className="mt-1">
                   Prometheus-style pull for infrastructure metrics (better failure 
@@ -98,7 +103,7 @@ export default function InternalToolingArchitecture() {
                   on what question you're trying to answer and how quickly.
                 </p>
               </div>
-              <div className="border-l-2 border-border pl-4">
+              <div className="border-l-2 border-border pl-4 hover:border-accent/50 transition-colors">
                 <p className="font-medium text-foreground">Runbook vs. Automation</p>
                 <p className="mt-1">
                   Some operations benefit from human judgment during execution. 
@@ -108,9 +113,9 @@ export default function InternalToolingArchitecture() {
               </div>
             </div>
           </article>
-        </FadeIn>
+        </StaggerItem>
 
-        <FadeIn delay={400}>
+        <StaggerItem>
           <article className="space-y-4">
             <h2 className="text-xl font-medium tracking-tight text-foreground">
               What I'd Change Next
@@ -139,9 +144,9 @@ export default function InternalToolingArchitecture() {
               </li>
             </ul>
           </article>
-        </FadeIn>
+        </StaggerItem>
 
-        <FadeIn delay={500}>
+        <StaggerItem>
           <div className="mt-12 pt-8 border-t border-border">
             <h2 className="text-xl font-medium tracking-tight text-foreground mb-6">
               Current System Snapshot
@@ -177,8 +182,8 @@ export default function InternalToolingArchitecture() {
         └──────────────────────────────────────────────────────────┘`}</pre>
             </div>
           </div>
-        </FadeIn>
-      </div>
+        </StaggerItem>
+      </StaggerContainer>
     </section>
   );
 }

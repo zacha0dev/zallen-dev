@@ -1,5 +1,6 @@
-import { FadeIn } from "@/components/FadeIn";
+import { motion } from "framer-motion";
 import { NavLink } from "@/components/NavLink";
+import { StaggerContainer, StaggerItem } from "@/components/StaggerContainer";
 
 interface Note {
   title: string;
@@ -25,7 +26,11 @@ const notes: Note[] = [
 export default function Notes() {
   return (
     <section className="container py-16">
-      <FadeIn>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
         <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
           Notes
         </h1>
@@ -33,12 +38,12 @@ export default function Notes() {
           Reflections on architectural decisions, system tradeoffs, 
           and the practice of building reliable infrastructure.
         </p>
-      </FadeIn>
+      </motion.div>
 
-      <div className="mt-16 space-y-12">
-        {notes.map((note, index) => (
-          <FadeIn key={note.title} delay={index * 100}>
-            <article className="border-l-2 border-border pl-6">
+      <StaggerContainer className="mt-16 space-y-12" staggerDelay={0.1}>
+        {notes.map((note) => (
+          <StaggerItem key={note.title}>
+            <article className="border-l-2 border-border pl-6 hover:border-accent/50 transition-colors">
               <time className="text-sm text-muted-foreground">{note.date}</time>
               <h2 className="mt-2 text-xl font-medium tracking-tight">
                 {note.title}
@@ -47,24 +52,27 @@ export default function Notes() {
                 {note.content}
               </p>
             </article>
-          </FadeIn>
+          </StaggerItem>
         ))}
-      </div>
+      </StaggerContainer>
 
-      <FadeIn delay={300}>
-        <div className="mt-16 pt-8 border-t border-border">
-          <p className="text-muted-foreground">
-            See also:{" "}
-            <NavLink
-              to="/decisions"
-              className="text-foreground hover:text-accent transition-colors underline underline-offset-4"
-            >
-              Decision Log
-            </NavLink>
-            {" "}— specific technical decisions with context and outcomes.
-          </p>
-        </div>
-      </FadeIn>
+      <motion.div
+        className="mt-16 pt-8 border-t border-border"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+      >
+        <p className="text-muted-foreground">
+          See also:{" "}
+          <NavLink
+            to="/decisions"
+            className="text-foreground hover:text-accent transition-colors underline underline-offset-4"
+          >
+            Decision Log
+          </NavLink>
+          {" "}— specific technical decisions with context and outcomes.
+        </p>
+      </motion.div>
     </section>
   );
 }
