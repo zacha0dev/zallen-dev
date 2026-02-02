@@ -25,8 +25,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
           >
-            Cloud & Platform Engineer
-            <span className="hidden sm:inline"> (Solutions-Focused)</span>
+            Cloud & Software Engineer
           </motion.p>
 
           <motion.p
@@ -35,9 +34,10 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
           >
-            I design and operate production systems that other teams build on. My work 
-            focuses on cloud foundations, platform workflows, and architectures that 
-            scale cleanly while remaining stable under pressure.
+            I work across network, platform, and application layers — diagnosing 
+            complex issues and translating business impact into clear technical action. 
+            Outside of work, I build to learn: exploring platform engineering, system 
+            architecture, and modern cloud infrastructure.
           </motion.p>
         </div>
       </section>
