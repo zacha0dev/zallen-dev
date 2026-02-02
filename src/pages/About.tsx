@@ -20,22 +20,20 @@ export default function About() {
         transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
       >
         <p>
-          I'm a cloud and platform engineer focused on Azure networking, 
-          infrastructure automation, and the systems that enable engineering 
-          teams to ship reliably. My work emphasizes end-to-end ownership - from 
-          network architecture to deployment pipelines.
+          Cloud and software engineer with deep experience in Azure networking, 
+          infrastructure, and production system troubleshooting. I work across 
+          network, platform, and application layers to diagnose complex, 
+          multi-layer issues and translate business impact into clear technical actions.
         </p>
         <p>
-          I stay sharp by building. Practice environments, networking labs, 
-          and internal tooling keep my hands in real infrastructure while 
-          exploring patterns that scale. Curiosity drives the work; iteration 
-          refines the judgment.
+          My background spans enterprise cloud platforms and customer-facing 
+          production support, with a focus on reliability, systems thinking, 
+          and large-scale distributed environments.
         </p>
         <p>
-          Systems thinking shapes how I approach problems - understanding 
-          dependencies, anticipating failure modes, and designing for 
-          operational clarity. The best platform work disappears into the 
-          background, enabling others to move faster without thinking about it.
+          Outside of day-to-day work, I build and explore applications and 
+          platforms to deepen my understanding of platform engineering, system 
+          architecture, and modern cloud and AI infrastructure.
         </p>
       </motion.div>
     </section>
