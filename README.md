@@ -1,73 +1,189 @@
-# Welcome to your Lovable project
+# zallen.dev
 
-## Project info
+Personal portfolio and engineering journal for Zachary Allen — a Cloud & Platform Engineer focused on Azure networking, infrastructure automation, and systems that enable teams to ship reliably.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+**Live site**: [systems-whisper.lovable.app](https://systems-whisper.lovable.app) (zallen.dev pending)
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## What This Project Demonstrates
 
-**Use Lovable**
+This isn't a template. It's a deliberately architected portfolio that reflects how I approach engineering problems:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+- **Systems thinking over feature checklists** — The architecture prioritizes maintainability and clear separation of concerns, not framework maximalism.
+- **Content as engineering artifact** — Decision logs, architecture notes, and methodology documentation live alongside code, not in a CMS.
+- **Restraint as design principle** — Minimalist aesthetic, no backend dependencies, static-first delivery. Complexity is earned, not assumed.
+- **AI as accelerator, not author** — AI tools (including Lovable) were used to increase velocity, but every decision was intentional and reviewed.
 
-Changes made via Lovable will be committed automatically to this repo.
+---
 
-**Use your preferred IDE**
+## Tech Stack
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+| Layer | Technology |
+|-------|------------|
+| Framework | React 18 + TypeScript |
+| Build | Vite |
+| Styling | Tailwind CSS + CSS custom properties |
+| Components | shadcn/ui (Radix primitives) |
+| Animation | Framer Motion |
+| Routing | React Router v6 |
+| Deployment | Lovable Cloud (static hosting) |
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Why This Stack?
 
-Follow these steps:
+- **React + TypeScript**: Type safety and ecosystem maturity for maintainable frontend code
+- **Vite**: Fast development feedback loops, optimized production builds
+- **Tailwind + shadcn/ui**: Design system consistency without framework lock-in
+- **Framer Motion**: Declarative animations that enhance without overwhelming
+- **No backend**: Intentional constraint — content changes require code changes, creating an audit trail
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+---
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## Architecture
 
-# Step 3: Install the necessary dependencies.
-npm i
+```
+src/
+├── components/
+│   ├── layout/          # Header, Footer, Layout wrapper
+│   ├── ui/              # shadcn/ui primitives
+│   └── [animations]     # Motion components (FadeIn, StaggerContainer, etc.)
+├── pages/
+│   ├── projects/        # Individual project deep-dives
+│   └── [routes]         # Home, About, Projects, Notes, Decisions, Resume, HowIWork
+├── hooks/               # Custom React hooks
+├── lib/                 # Utility functions
+└── index.css            # Design tokens and global styles
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### Key Patterns
+
+- **Semantic design tokens**: Colors defined as CSS custom properties, consumed via Tailwind
+- **Staggered animations**: Content reveals progressively using Framer Motion variants
+- **Static content in code**: All portfolio content lives in TypeScript, enabling type-checking and refactoring support
+- **Route-based code splitting**: Each page is a discrete module, improving initial load performance
+
+---
+
+## Local Development
+
+### Prerequisites
+
+- Node.js 18+ (recommend using [nvm](https://github.com/nvm-sh/nvm))
+- npm or bun
+
+### Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/zacha0dev/zallen-portfolio.git
+cd zallen-portfolio
+
+# Install dependencies
+npm install
+
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The site will be available at `http://localhost:5173`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Available Scripts
 
-**Use GitHub Codespaces**
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server with HMR |
+| `npm run build` | Production build to `dist/` |
+| `npm run preview` | Preview production build locally |
+| `npm run lint` | Run ESLint |
+| `npm test` | Run Vitest test suite |
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+---
 
-## What technologies are used for this project?
+## Performance & SEO
 
-This project is built with:
+### Performance Considerations
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- **Static-first**: No SSR complexity, pure client-side rendering with optimized bundles
+- **Code splitting**: Route-based lazy loading via React Router
+- **Minimal dependencies**: Careful selection of runtime dependencies
+- **Optimized fonts**: System font stack with optional web font loading
 
-## How can I deploy this project?
+### SEO Implementation
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+- Semantic HTML structure (`<header>`, `<main>`, `<section>`, `<article>`)
+- Proper heading hierarchy (single `<h1>` per page)
+- Meta tags for title, description, and Open Graph
+- Favicon and touch icons configured
+- `robots.txt` for crawler guidance
 
-## Can I connect a custom domain to my Lovable project?
+---
 
-Yes, you can!
+## Deployment
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+The site is deployed via Lovable Cloud, which provides:
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- Automatic deployments on push
+- Global CDN distribution
+- SSL/TLS certificates
+- Custom domain support
+
+For self-hosting, the `dist/` output from `npm run build` can be deployed to any static hosting provider (Vercel, Netlify, Cloudflare Pages, S3 + CloudFront, etc.).
+
+---
+
+## Documentation
+
+Engineering documentation lives in `/docs`:
+
+| Document | Description |
+|----------|-------------|
+| [01-vision.md](docs/01-vision.md) | Intent and direction of the portfolio |
+| [02-decisions.md](docs/02-decisions.md) | Key technical and design decisions |
+| [03-evolution.md](docs/03-evolution.md) | Roadmap and future iterations |
+| [04-ai-workflow.md](docs/04-ai-workflow.md) | How AI tools are used responsibly |
+
+---
+
+## Screenshots
+
+> Screenshots to be added after final design review
+
+| Page | Preview |
+|------|---------|
+| Home | _placeholder_ |
+| Projects | _placeholder_ |
+| Architecture Deep-Dive | _placeholder_ |
+
+---
+
+## Roadmap
+
+### Near-term
+- [ ] Connect custom domain (zallen.dev)
+- [ ] Add more architecture deep-dives
+- [ ] Implement dark/light theme toggle refinements
+
+### Medium-term
+- [ ] Add project filtering/categorization
+- [ ] Performance monitoring integration
+- [ ] Automated accessibility testing in CI
+
+### Long-term
+- [ ] Technical blog integration (likely static markdown)
+- [ ] Interactive architecture diagrams
+- [ ] Case study expansion with measurable outcomes
+
+---
+
+## About the Author
+
+**Zachary Allen** — Cloud & Platform Engineer focused on Azure networking, infrastructure automation, and enabling engineering teams to ship reliably.
+
+- [GitHub](https://github.com/zacha0dev)
+- [LinkedIn](https://www.linkedin.com/in/zacharythomasallen/)
+
+---
+
+## License
+
+This project is open source for educational and portfolio purposes. Feel free to reference the architecture and patterns, but please don't directly copy the personal content.
