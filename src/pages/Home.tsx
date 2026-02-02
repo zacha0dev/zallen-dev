@@ -1,8 +1,11 @@
 import { motion } from "framer-motion";
+import { ParticleConstellation } from "@/components/ParticleConstellation";
 
 export default function Home() {
   return (
-    <section className="container flex min-h-[calc(100vh-5rem)] flex-col justify-center">
+    <>
+      <ParticleConstellation />
+      <section className="container relative z-10 flex min-h-[calc(100vh-5rem)] flex-col justify-center">
       <motion.h1
         className="text-5xl font-semibold tracking-tight sm:text-6xl md:text-7xl"
         initial={{ opacity: 0, y: 20 }}
@@ -32,6 +35,7 @@ export default function Home() {
         focuses on cloud foundations, platform workflows, and architectures that 
         scale cleanly while remaining stable under pressure.
       </motion.p>
-    </section>
+      </section>
+    </>
   );
 }
