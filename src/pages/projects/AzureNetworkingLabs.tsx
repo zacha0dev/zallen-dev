@@ -1,16 +1,21 @@
-import { FadeIn } from "@/components/FadeIn";
+import { motion } from "framer-motion";
 import { NavLink } from "@/components/NavLink";
 import { ArrowLeft } from "lucide-react";
+import { StaggerContainer, StaggerItem } from "@/components/StaggerContainer";
 
 export default function AzureNetworkingLabsArchitecture() {
   return (
     <section className="container py-16">
-      <FadeIn>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
         <NavLink
           to="/projects"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8 group"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
           Back to Projects
         </NavLink>
 
@@ -20,10 +25,10 @@ export default function AzureNetworkingLabsArchitecture() {
         <p className="mt-4 text-lg text-muted-foreground">
           Architecture Notes
         </p>
-      </FadeIn>
+      </motion.div>
 
-      <div className="mt-16 space-y-12">
-        <FadeIn delay={100}>
+      <StaggerContainer className="mt-16 space-y-12" staggerDelay={0.1}>
+        <StaggerItem>
           <article className="space-y-4">
             <h2 className="text-xl font-medium tracking-tight text-foreground">
               Problem Constraints
@@ -42,47 +47,47 @@ export default function AzureNetworkingLabsArchitecture() {
               </p>
             </div>
           </article>
-        </FadeIn>
+        </StaggerItem>
 
-        <FadeIn delay={200}>
+        <StaggerItem>
           <article className="space-y-4">
             <h2 className="text-xl font-medium tracking-tight text-foreground">
               Key Design Decisions
             </h2>
             <ul className="space-y-4 text-foreground/90 leading-relaxed">
-              <li className="border-l-2 border-border pl-4">
+              <li className="border-l-2 border-border pl-4 hover:border-accent/50 transition-colors">
                 <strong className="text-foreground">Ephemeral by design.</strong>{" "}
                 Labs are meant to be destroyed and recreated. This forces complete 
                 automation and prevents configuration drift. A lab that can't be 
                 rebuilt from scratch has failed its primary purpose.
               </li>
-              <li className="border-l-2 border-border pl-4">
+              <li className="border-l-2 border-border pl-4 hover:border-accent/50 transition-colors">
                 <strong className="text-foreground">Realistic topologies.</strong>{" "}
                 Hub-spoke networks, multi-region connectivity, and hybrid DNS scenarios. 
                 Simplified "hello world" networks don't surface the edge cases that 
                 matter in production.
               </li>
-              <li className="border-l-2 border-border pl-4">
+              <li className="border-l-2 border-border pl-4 hover:border-accent/50 transition-colors">
                 <strong className="text-foreground">Observability built in.</strong>{" "}
                 Every lab includes logging, flow visualization, and DNS query tracing. 
                 Understanding what's happening matters more than just making it work.
               </li>
-              <li className="border-l-2 border-border pl-4">
+              <li className="border-l-2 border-border pl-4 hover:border-accent/50 transition-colors">
                 <strong className="text-foreground">Cost boundaries enforced.</strong>{" "}
                 Auto-shutdown schedules, resource tagging for cost tracking, and alerts 
                 on spend thresholds. Learning shouldn't require unexpected invoices.
               </li>
             </ul>
           </article>
-        </FadeIn>
+        </StaggerItem>
 
-        <FadeIn delay={300}>
+        <StaggerItem>
           <article className="space-y-4">
             <h2 className="text-xl font-medium tracking-tight text-foreground">
               Tradeoffs Considered
             </h2>
             <div className="space-y-4 text-foreground/90 leading-relaxed">
-              <div className="border-l-2 border-border pl-4">
+              <div className="border-l-2 border-border pl-4 hover:border-accent/50 transition-colors">
                 <p className="font-medium text-foreground">Terraform vs. Bicep for Azure-only</p>
                 <p className="mt-1">
                   Used both intentionally. Terraform for complex multi-resource labs 
@@ -90,7 +95,7 @@ export default function AzureNetworkingLabsArchitecture() {
                   (faster iteration). Context determines the tool.
                 </p>
               </div>
-              <div className="border-l-2 border-border pl-4">
+              <div className="border-l-2 border-border pl-4 hover:border-accent/50 transition-colors">
                 <p className="font-medium text-foreground">Virtual WAN vs. Traditional Hub-Spoke</p>
                 <p className="mt-1">
                   Built labs for both patterns. Virtual WAN simplifies management but 
@@ -98,7 +103,7 @@ export default function AzureNetworkingLabsArchitecture() {
                   configuration but teaches deeper routing fundamentals.
                 </p>
               </div>
-              <div className="border-l-2 border-border pl-4">
+              <div className="border-l-2 border-border pl-4 hover:border-accent/50 transition-colors">
                 <p className="font-medium text-foreground">Private DNS Zones vs. Custom DNS VMs</p>
                 <p className="mt-1">
                   Azure Private DNS Zones for most scenarios (simpler, cheaper), but 
@@ -108,9 +113,9 @@ export default function AzureNetworkingLabsArchitecture() {
               </div>
             </div>
           </article>
-        </FadeIn>
+        </StaggerItem>
 
-        <FadeIn delay={400}>
+        <StaggerItem>
           <article className="space-y-4">
             <h2 className="text-xl font-medium tracking-tight text-foreground">
               What I'd Change Next
@@ -139,9 +144,9 @@ export default function AzureNetworkingLabsArchitecture() {
               </li>
             </ul>
           </article>
-        </FadeIn>
+        </StaggerItem>
 
-        <FadeIn delay={500}>
+        <StaggerItem>
           <div className="mt-12 pt-8 border-t border-border">
             <h2 className="text-xl font-medium tracking-tight text-foreground mb-6">
               Current System Snapshot
@@ -182,8 +187,8 @@ export default function AzureNetworkingLabsArchitecture() {
 └─────────────────────────┘               └─────────────────────────┘`}</pre>
             </div>
           </div>
-        </FadeIn>
-      </div>
+        </StaggerItem>
+      </StaggerContainer>
     </section>
   );
 }

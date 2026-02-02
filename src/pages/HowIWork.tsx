@@ -1,19 +1,24 @@
-import { FadeIn } from "@/components/FadeIn";
+import { motion } from "framer-motion";
+import { StaggerContainer, StaggerItem } from "@/components/StaggerContainer";
 
 export default function HowIWork() {
   return (
     <section className="container py-16">
-      <FadeIn>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
         <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
           How I Work
         </h1>
         <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
           My approach to engineering problems, from ambiguity to production.
         </p>
-      </FadeIn>
+      </motion.div>
 
-      <div className="mt-16 space-y-16">
-        <FadeIn delay={100}>
+      <StaggerContainer className="mt-16 space-y-16" staggerDelay={0.1}>
+        <StaggerItem>
           <article className="space-y-4">
             <h2 className="text-2xl font-medium tracking-tight text-foreground">
               Approaching Ambiguous Problems
@@ -37,9 +42,9 @@ export default function HowIWork() {
               </p>
             </div>
           </article>
-        </FadeIn>
+        </StaggerItem>
 
-        <FadeIn delay={200}>
+        <StaggerItem>
           <article className="space-y-4">
             <h2 className="text-2xl font-medium tracking-tight text-foreground">
               Testing Ideas
@@ -62,9 +67,9 @@ export default function HowIWork() {
               </p>
             </div>
           </article>
-        </FadeIn>
+        </StaggerItem>
 
-        <FadeIn delay={300}>
+        <StaggerItem>
           <article className="space-y-4">
             <h2 className="text-2xl font-medium tracking-tight text-foreground">
               Balancing Speed and Correctness
@@ -88,9 +93,9 @@ export default function HowIWork() {
               </p>
             </div>
           </article>
-        </FadeIn>
+        </StaggerItem>
 
-        <FadeIn delay={400}>
+        <StaggerItem>
           <article className="space-y-4">
             <h2 className="text-2xl font-medium tracking-tight text-foreground">
               Working With Teams
@@ -114,9 +119,9 @@ export default function HowIWork() {
               </p>
             </div>
           </article>
-        </FadeIn>
+        </StaggerItem>
 
-        <FadeIn delay={500}>
+        <StaggerItem>
           <article className="space-y-4">
             <h2 className="text-2xl font-medium tracking-tight text-foreground">
               Continuous Improvement
@@ -136,8 +141,8 @@ export default function HowIWork() {
               </p>
             </div>
           </article>
-        </FadeIn>
-      </div>
+        </StaggerItem>
+      </StaggerContainer>
     </section>
   );
 }

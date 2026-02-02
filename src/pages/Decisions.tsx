@@ -1,4 +1,5 @@
-import { FadeIn } from "@/components/FadeIn";
+import { motion } from "framer-motion";
+import { StaggerContainer, StaggerItem } from "@/components/StaggerContainer";
 
 interface Decision {
   title: string;
@@ -54,19 +55,23 @@ const decisions: Decision[] = [
 export default function Decisions() {
   return (
     <section className="container py-16">
-      <FadeIn>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
         <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
           Decision Log
         </h1>
         <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
           Key technical decisions, the reasoning behind them, and what I learned.
         </p>
-      </FadeIn>
+      </motion.div>
 
-      <div className="mt-16 space-y-12">
-        {decisions.map((decision, index) => (
-          <FadeIn key={decision.title} delay={index * 100}>
-            <article className="border-l-2 border-border pl-6 space-y-4">
+      <StaggerContainer className="mt-16 space-y-12" staggerDelay={0.1}>
+        {decisions.map((decision) => (
+          <StaggerItem key={decision.title}>
+            <article className="border-l-2 border-border pl-6 space-y-4 hover:border-accent/50 transition-colors">
               <div>
                 <time className="text-sm text-muted-foreground">
                   {decision.date}
@@ -101,9 +106,9 @@ export default function Decisions() {
                 )}
               </div>
             </article>
-          </FadeIn>
+          </StaggerItem>
         ))}
-      </div>
+      </StaggerContainer>
     </section>
   );
 }
