@@ -43,7 +43,7 @@ export default function InternalToolingArchitecture() {
               <p>
                 The constraint is building tools that genuinely reduce toil 
                 without introducing new maintenance burdens. Automation that 
-                requires constant care doesn't solve problems—it relocates them.
+                requires constant care doesn't solve problems - it relocates them.
               </p>
             </div>
           </article>

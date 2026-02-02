@@ -37,7 +37,7 @@ const decisions: Decision[] = [
     decision:
       "Monorepo with strict directory boundaries. Shared types are explicitly exported. CI/CD detects which components changed and builds only those.",
     outcome:
-      "Atomic commits across frontend and backend have been valuable for coordinated changes. The build system complexity was worth it—deploys that would require coordinating multiple PRs now happen in one commit.",
+      "Atomic commits across frontend and backend have been valuable for coordinated changes. The build system complexity was worth it - deploys that would require coordinating multiple PRs now happen in one commit.",
   },
   {
     title: "What broke: DNS resolution in hub-spoke topology",
