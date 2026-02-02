@@ -11,7 +11,7 @@ export function Layout() {
     <div className="flex min-h-screen flex-col">
       <ScrollProgress />
       <Header />
-      <main className="flex-1 pt-20">
+      <main className="flex-1 pt-16 sm:pt-20">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={location.pathname}

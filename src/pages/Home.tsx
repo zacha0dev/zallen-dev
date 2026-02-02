@@ -5,13 +5,13 @@ export default function Home() {
   return (
     <>
       <ParticleConstellation />
-      <section className="container relative z-10 flex min-h-[calc(100vh-5rem)] flex-col justify-center">
+      <section className="container relative z-10 flex min-h-[calc(100vh-10rem)] sm:min-h-[calc(100vh-5rem)] flex-col justify-center py-8 sm:py-0">
         <div className="relative">
           {/* Subtle backdrop to ensure text readability */}
           <div className="absolute -inset-x-8 -inset-y-4 bg-gradient-to-r from-background via-background/95 to-background/80 blur-xl -z-10" />
           
           <motion.h1
-            className="text-5xl font-semibold tracking-tight sm:text-6xl md:text-7xl"
+            className="text-4xl font-semibold tracking-tight sm:text-6xl md:text-7xl"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
@@ -30,7 +30,7 @@ export default function Home() {
           </motion.p>
 
           <motion.p
-            className="mt-8 max-w-2xl text-lg leading-relaxed text-muted-foreground"
+            className="mt-6 sm:mt-8 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}

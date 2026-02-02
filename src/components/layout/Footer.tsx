@@ -23,7 +23,7 @@ export function Footer() {
 
   return (
     <footer className="border-t border-border">
-      <div className="container py-12">
+      <div className="container py-6 sm:py-12">
         <div className="flex flex-col items-center gap-6">
           <div className="flex items-center gap-8">
             {socialLinks.map((link) => (
