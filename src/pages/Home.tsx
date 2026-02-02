@@ -34,7 +34,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
           >
-            I work across network, platform, and application layers — diagnosing 
+            I work across network, platform, and application layers - diagnosing 
             complex issues and translating business impact into clear technical action. 
             Outside of work, I build to learn: exploring platform engineering, system 
             architecture, and modern cloud infrastructure.
