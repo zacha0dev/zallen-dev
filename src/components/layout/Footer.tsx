@@ -2,12 +2,12 @@ import { Github, Linkedin, FileText } from "lucide-react";
 
 const socialLinks = [
   {
-    href: "https://github.com",
+    href: "https://github.com/zacha0dev",
     label: "GitHub",
     icon: Github,
   },
   {
-    href: "https://linkedin.com",
+    href: "https://www.linkedin.com/in/zacharythomasallen/",
     label: "LinkedIn",
     icon: Linkedin,
   },
