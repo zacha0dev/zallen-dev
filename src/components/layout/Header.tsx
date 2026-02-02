@@ -63,15 +63,21 @@ export function Header() {
             </SheetTrigger>
             <SheetContent
               side="right"
-              className="w-full h-full border-none bg-background p-0 flex flex-col"
+              className="w-full h-full border-none bg-background p-0 flex flex-col [&>button]:hidden"
             >
               <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
               
               {/* Header inside sheet */}
-              <div className="p-6 pt-12 border-b border-border/50">
+              <div className="flex items-center justify-between p-6">
                 <span className="text-lg font-medium tracking-tight text-foreground">
                   ZA
                 </span>
+                <SheetClose asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <X className="h-4 w-4" />
+                    <span className="sr-only">Close menu</span>
+                  </Button>
+                </SheetClose>
               </div>
 
               {/* Navigation Links */}
