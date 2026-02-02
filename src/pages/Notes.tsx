@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { NavLink } from "@/components/NavLink";
-import { StaggerContainer, StaggerItem } from "@/components/StaggerContainer";
 
 interface Note {
   title: string;
@@ -23,6 +22,29 @@ const notes: Note[] = [
   },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: "easeOut" as const,
+    },
+  },
+};
+
 export default function Notes() {
   return (
     <section className="container py-16">
@@ -40,21 +62,28 @@ export default function Notes() {
         </p>
       </motion.div>
 
-      <StaggerContainer className="mt-16 space-y-12" staggerDelay={0.1}>
+      <motion.div
+        className="mt-16 space-y-12"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {notes.map((note) => (
-          <StaggerItem key={note.title}>
-            <article className="border-l-2 border-border pl-6 hover:border-accent/50 transition-colors">
-              <time className="text-sm text-muted-foreground">{note.date}</time>
-              <h2 className="mt-2 text-xl font-medium tracking-tight">
-                {note.title}
-              </h2>
-              <p className="mt-4 text-foreground/90 leading-relaxed">
-                {note.content}
-              </p>
-            </article>
-          </StaggerItem>
+          <motion.article
+            key={note.title}
+            className="border-l-2 border-border pl-6 hover:border-accent/50 transition-colors"
+            variants={itemVariants}
+          >
+            <time className="text-sm text-muted-foreground">{note.date}</time>
+            <h2 className="mt-2 text-xl font-medium tracking-tight">
+              {note.title}
+            </h2>
+            <p className="mt-4 text-foreground/90 leading-relaxed">
+              {note.content}
+            </p>
+          </motion.article>
         ))}
-      </StaggerContainer>
+      </motion.div>
 
       <motion.div
         className="mt-16 pt-8 border-t border-border"
