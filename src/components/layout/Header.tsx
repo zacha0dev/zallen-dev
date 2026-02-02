@@ -29,9 +29,11 @@ export function Header() {
       <nav className="container flex items-center justify-between py-6">
         <NavLink
           to="/"
-          className="text-lg font-medium tracking-tight text-foreground hover:text-accent transition-colors"
+          className="group flex items-center gap-0.5 text-foreground hover:text-accent transition-colors"
         >
-          ZA
+          <span className="text-muted-foreground group-hover:text-accent transition-colors">[</span>
+          <span className="text-sm font-medium tracking-tight px-1">ZA</span>
+          <span className="text-muted-foreground group-hover:text-accent transition-colors">]</span>
         </NavLink>
 
         {/* Desktop Navigation */}
@@ -69,8 +71,10 @@ export function Header() {
               
               {/* Header inside sheet */}
               <div className="flex items-center justify-between p-6">
-                <span className="text-lg font-medium tracking-tight text-foreground">
-                  ZA
+                <span className="flex items-center gap-0.5 text-foreground">
+                  <span className="text-muted-foreground">[</span>
+                  <span className="text-sm font-medium tracking-tight px-1">ZA</span>
+                  <span className="text-muted-foreground">]</span>
                 </span>
                 <SheetClose asChild>
                   <Button variant="ghost" size="icon" className="h-8 w-8">
