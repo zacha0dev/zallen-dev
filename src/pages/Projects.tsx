@@ -1,6 +1,8 @@
-import { FadeIn } from "@/components/FadeIn";
+import { motion } from "framer-motion";
 import { NavLink } from "@/components/NavLink";
 import { ArrowRight } from "lucide-react";
+import { PageTransition } from "@/components/PageTransition";
+import { StaggerContainer, StaggerItem } from "@/components/StaggerContainer";
 
 interface Project {
   title: string;
@@ -42,60 +44,71 @@ const projects: Project[] = [
 
 export default function Projects() {
   return (
-    <section className="container py-16">
-      <FadeIn>
-        <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-          Projects
-        </h1>
-        <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
-          Engineering systems and practice environments focused on architectural 
-          exploration, iteration, and learning through real constraints.
-        </p>
-      </FadeIn>
+    <PageTransition>
+      <section className="container py-16">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
+          <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
+            Projects
+          </h1>
+          <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
+            Engineering systems and practice environments focused on architectural 
+            exploration, iteration, and learning through real constraints.
+          </p>
+        </motion.div>
 
-      <div className="mt-16 grid gap-8">
-        {projects.map((project, index) => (
-          <FadeIn key={project.title} delay={index * 100}>
-            <article className="group rounded-lg border border-border bg-card p-8 transition-all hover:border-accent/50 hover:translate-y-[-2px]">
-              <h2 className="text-2xl font-medium tracking-tight">
-                {project.title}
-              </h2>
-
-              <div className="mt-6 space-y-4">
-                <div>
-                  <p className="text-foreground/90">{project.description}</p>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-                    Approach
-                  </h3>
-                  <p className="mt-2 text-foreground/90">{project.approach}</p>
-                </div>
-              </div>
-
-              <div className="mt-6 flex flex-wrap gap-2">
-                {project.technologies.map((tech) => (
-                  <span
-                    key={tech}
-                    className="rounded bg-secondary px-3 py-1 text-sm text-muted-foreground"
-                  >
-                    {tech}
-                  </span>
-                ))}
-              </div>
-
-              <NavLink
-                to={`/projects/${project.slug}`}
-                className="mt-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        <StaggerContainer className="mt-16 grid gap-8" staggerDelay={0.1}>
+          {projects.map((project) => (
+            <StaggerItem key={project.title}>
+              <motion.article
+                className="group rounded-lg border border-border bg-card p-8 transition-colors hover:border-accent/50"
+                whileHover={{ y: -4, transition: { duration: 0.2 } }}
               >
-                Architecture Notes
-                <ArrowRight className="h-4 w-4" />
-              </NavLink>
-            </article>
-          </FadeIn>
-        ))}
-      </div>
-    </section>
+                <h2 className="text-2xl font-medium tracking-tight">
+                  {project.title}
+                </h2>
+
+                <div className="mt-6 space-y-4">
+                  <div>
+                    <p className="text-foreground/90">{project.description}</p>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+                      Approach
+                    </h3>
+                    <p className="mt-2 text-foreground/90">{project.approach}</p>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {project.technologies.map((tech) => (
+                    <span
+                      key={tech}
+                      className="rounded bg-secondary px-3 py-1 text-sm text-muted-foreground"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+
+                <NavLink
+                  to={`/projects/${project.slug}`}
+                  className="mt-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group/link"
+                >
+                  <span className="relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-accent after:transition-all after:duration-300 group-hover/link:after:w-full">
+                    Architecture Notes
+                  </span>
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover/link:translate-x-1" />
+                </NavLink>
+              </motion.article>
+            </StaggerItem>
+          ))}
+        </StaggerContainer>
+      </section>
+    </PageTransition>
   );
 }

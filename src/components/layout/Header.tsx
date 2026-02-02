@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { NavLink } from "@/components/NavLink";
+import { AnimatedLogo } from "@/components/AnimatedLogo";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Menu, X } from "lucide-react";
 import {
@@ -20,6 +22,32 @@ const navItems = [
   { to: "/resume", label: "Resume", number: "06" },
 ];
 
+const navItemVariants = {
+  hidden: { opacity: 0, y: -8 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: 0.3 + i * 0.05,
+      duration: 0.4,
+      ease: "easeOut" as const,
+    },
+  }),
+};
+
+const mobileItemVariants = {
+  hidden: { opacity: 0, x: 20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    x: 0,
+    transition: {
+      delay: i * 0.08,
+      duration: 0.4,
+      ease: "easeOut" as const,
+    },
+  }),
+};
+
 export function Header() {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
@@ -27,29 +55,28 @@ export function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm">
       <nav className="container flex items-center justify-between py-6">
-        <NavLink
-          to="/"
-          className="group flex items-center gap-0.5 text-foreground hover:text-accent transition-colors"
-        >
-          <span className="text-muted-foreground group-hover:text-accent transition-colors">[</span>
-          <span className="text-sm font-medium tracking-tight px-1">ZA</span>
-          <span className="text-muted-foreground group-hover:text-accent transition-colors">]</span>
-        </NavLink>
+        <AnimatedLogo />
 
         {/* Desktop Navigation */}
         {!isMobile && (
           <ul className="flex items-center gap-8">
-            {navItems.map((item) => (
-              <li key={item.to}>
+            {navItems.map((item, i) => (
+              <motion.li
+                key={item.to}
+                custom={i}
+                variants={navItemVariants}
+                initial="hidden"
+                animate="visible"
+              >
                 <NavLink
                   to={item.to}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  activeClassName="text-foreground"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-accent after:transition-all after:duration-300 hover:after:w-full"
+                  activeClassName="text-foreground after:w-full"
                   end={item.to === "/"}
                 >
                   {item.label}
                 </NavLink>
-              </li>
+              </motion.li>
             ))}
           </ul>
         )}
@@ -88,12 +115,13 @@ export function Header() {
               <div className="flex-1 flex flex-col justify-center px-8">
                 <ul className="space-y-2">
                   {navItems.map((item, index) => (
-                    <li
+                    <motion.li
                       key={item.to}
                       className="overflow-hidden"
-                      style={{
-                        animationDelay: `${index * 50}ms`,
-                      }}
+                      custom={index}
+                      variants={mobileItemVariants}
+                      initial="hidden"
+                      animate="visible"
                     >
                       <SheetClose asChild>
                         <NavLink
@@ -111,7 +139,7 @@ export function Header() {
                           <span className="flex-1 h-px bg-border/30 group-hover:bg-accent/50 transition-colors duration-300" />
                         </NavLink>
                       </SheetClose>
-                    </li>
+                    </motion.li>
                   ))}
                 </ul>
               </div>

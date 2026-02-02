@@ -1,28 +1,37 @@
-import { FadeIn } from "@/components/FadeIn";
+import { motion } from "framer-motion";
 
 export default function Home() {
   return (
     <section className="container flex min-h-[calc(100vh-5rem)] flex-col justify-center">
-      <FadeIn>
-        <h1 className="text-5xl font-semibold tracking-tight sm:text-6xl md:text-7xl">
-          Zachary Allen
-        </h1>
-      </FadeIn>
+      <motion.h1
+        className="text-5xl font-semibold tracking-tight sm:text-6xl md:text-7xl"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        Zachary Allen
+      </motion.h1>
 
-      <FadeIn delay={100}>
-        <p className="mt-4 text-xl text-muted-foreground sm:text-2xl">
-          Cloud & Platform Engineer
-          <span className="hidden sm:inline"> (Solutions-Focused)</span>
-        </p>
-      </FadeIn>
+      <motion.p
+        className="mt-4 text-xl text-muted-foreground sm:text-2xl"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+      >
+        Cloud & Platform Engineer
+        <span className="hidden sm:inline"> (Solutions-Focused)</span>
+      </motion.p>
 
-      <FadeIn delay={200}>
-        <p className="mt-8 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-          I design and operate production systems that other teams build on. My work 
-          focuses on cloud foundations, platform workflows, and architectures that 
-          scale cleanly while remaining stable under pressure.
-        </p>
-      </FadeIn>
+      <motion.p
+        className="mt-8 max-w-2xl text-lg leading-relaxed text-muted-foreground"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+      >
+        I design and operate production systems that other teams build on. My work 
+        focuses on cloud foundations, platform workflows, and architectures that 
+        scale cleanly while remaining stable under pressure.
+      </motion.p>
     </section>
   );
 }
