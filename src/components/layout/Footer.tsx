@@ -1,4 +1,4 @@
-import { Github, Linkedin, FileText } from "lucide-react";
+import { Github, Linkedin, FileText, Figma } from "lucide-react";
 
 const socialLinks = [
   {
@@ -10,6 +10,11 @@ const socialLinks = [
     href: "https://www.linkedin.com/in/zacharythomasallen/",
     label: "LinkedIn",
     icon: Linkedin,
+  },
+  {
+    href: "https://www.figma.com/@zacha0dev",
+    label: "Figma",
+    icon: Figma,
   },
   {
     href: "/resume",
