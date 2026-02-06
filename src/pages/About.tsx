@@ -11,6 +11,9 @@ export default function About() {
         <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
           About
         </h1>
+        <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
+          Background and professional focus.
+        </p>
       </motion.div>
 
       <motion.div
@@ -20,20 +23,11 @@ export default function About() {
         transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
       >
         <p>
-          Cloud and software engineer with deep experience in Azure networking, 
-          infrastructure, and production system troubleshooting. I work across 
-          network, platform, and application layers to diagnose complex, 
-          multi-layer issues and translate business impact into clear technical actions.
+          Cloud and software engineer focused on Azure infrastructure, platform 
+          engineering, and production systems.
         </p>
-        <p>
-          My background spans enterprise cloud platforms and customer-facing 
-          production support, with a focus on reliability, systems thinking, 
-          and large-scale distributed environments.
-        </p>
-        <p>
-          Outside of day-to-day work, I build and explore applications and 
-          platforms to deepen my understanding of platform engineering, system 
-          architecture, and modern cloud and AI infrastructure.
+        <p className="text-muted-foreground">
+          More details coming.
         </p>
       </motion.div>
     </section>
