@@ -6,8 +6,8 @@ What the node costs, and what keeps it bounded.
 
 ## Why it is near $0 at rest
 
-- The Consumption plan scales to zero - you pay per execution, and an idle node
-  has none.
+- It is pay-as-you-go and scales to zero - you are charged only when a tool
+  actually runs, and an idle node runs nothing.
 - The artificial intelligence (AI) is yours (Claude / ChatGPT), so there is no
   large language model (LLM) cost charged to the node.
 - Logs are bounded by a daily ingestion cap.
