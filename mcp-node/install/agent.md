@@ -52,14 +52,22 @@ Echo the set back in one line before creating anything.
 
 ## 3. Deploy the infrastructure
 
-budgetStartDate = first of this month (YYYY-MM-01):
+Get the installer's object id (needed so the deploy can grant Key Vault data
+access; on an RBAC vault, subscription Owner does NOT include secret access -
+this is the reader-role wall):
+```
+INSTALLER_OID=$(az ad signed-in-user show --query id -o tsv)
+```
+Then deploy with budgetStartDate = first of this month (YYYY-MM-01):
 ```
 az deployment group create -g <rg> -f mcp-node/infra/node.bicep \
   -p nodeName=<nodeName> monthlyCapUsd=<cap> alertEmail=<email> \
-     budgetStartDate=<YYYY-MM-01>
+     budgetStartDate=<YYYY-MM-01> \
+     installerObjectId=$INSTALLER_OID installerPrincipalType=User
 ```
-Capture outputs: functionAppName, keyVaultName, functionHostName. This also
-grants the node's managed identity Contributor on this resource group only.
+Capture outputs: functionAppName, keyVaultName, functionHostName. This grants
+the node's identity Contributor on this resource group only, and grants both the
+node and the installer Key Vault Secrets Officer (read + rotate) on the vault.
 
 ## 4. Seed the OAuth secrets
 
