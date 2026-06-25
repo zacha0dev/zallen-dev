@@ -1,4 +1,4 @@
-[mcp-node](../README.md) · [Docs](README.md) · [← Scaling](08-scaling.md)
+← [All docs](README.md)
 
 # Extending: 3rd-party connectors and your own tools
 
