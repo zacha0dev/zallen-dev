@@ -113,11 +113,7 @@ built, it stops feeling abstract.
 
 ## Version
 
-**v0.1** - the node deploys, self-manages, caps its own spend, and connects Claude
-or ChatGPT today.
-
-- **v0.2** - one-command setup script
-- **v0.3** - one-click deploy
+**v1.0** - deploys, self-manages, caps its own spend, and connects Claude or ChatGPT.
 
 ---
 
