@@ -13,11 +13,12 @@ running. Read [Concepts](01-concepts.md) first for the vocabulary.
 - **Application Insights + Log Analytics** - logs and metrics.
 - **Budget** - the cost cap.
 
-## Step 1 - the client connects (OAuth)
+## Step 1 - the client connects (sign-in)
 
-Before any tool call, the artificial intelligence (AI) client gets a bearer token
-through the OAuth flow (full detail in [Auth](03-auth.md)). End state: the client
-holds a bearer it will send on every request.
+Before any tool call, the artificial intelligence (AI) client signs in and gets a
+**bearer token** - think of it as a private pass it shows on every request. This
+uses the Open Authorization (OAuth) sign-in flow (full detail in
+[Auth](03-auth.md)).
 
 ## Step 2 - the handshake (initialize)
 
