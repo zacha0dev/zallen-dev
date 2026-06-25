@@ -5,8 +5,8 @@ with AI, readable whether you write code or not.
 
 ## Projects
 
-- **[mcp-node](mcp-node/)** - An AI that runs its own cloud: a self-managing MCP
-  node you can stand up for about $10/month and explore.
+- **[mcp-node](mcp-node/)** - a single-tenant, self-managing MCP node (one Azure
+  resource group, ~$10/month cap).
 
 More to come.
 
