@@ -1,4 +1,4 @@
-[mcp-node](../README.md) · [Docs](README.md) · [← The server](04-server.md) · [Infrastructure →](06-infrastructure.md)
+← [All docs](README.md)
 
 # The tools
 
