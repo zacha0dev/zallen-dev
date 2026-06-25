@@ -1,3 +1,5 @@
+[mcp-node](../README.md) · [Docs](README.md) · [← Auth](03-auth.md) · [The tools →](05-tools.md)
+
 # The server
 
 Inside `src/` - the Azure Functions app that is the Model Context Protocol (MCP)
