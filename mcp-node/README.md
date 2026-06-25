@@ -53,6 +53,19 @@ An AI client (Claude, ChatGPT, any MCP client) connects over OAuth and can:
   client id, client secret, scopes.
 - **CLI** (Claude Code / Codex): MCP URL + bearer token.
 
+## Scaling
+
+Start with one node. As you take on more projects, the node can stamp more -
+each a fresh resource group with its own cost cap. Two ways:
+
+- **Default (safe):** run the install again with a new node name. Each node is
+  isolated in its own RG; the node's rights stay scoped to its own box.
+- **Self-replicating (opt-in):** run `scripts/enable-scaling.sh` once to grant
+  the node's identity subscription-scope rights. Then the connected AI can do it
+  from inside the connector via `azure_rg_create`, `azure_budget_set`, and
+  `azure_deploy_template` - create a capped RG and deploy a sibling node into it.
+  Off until you run it; revoke any time with the command the script prints.
+
 ## Cost
 
 One resource group, one budget. Default ~$10/month, set via `monthlyCapUsd`.
