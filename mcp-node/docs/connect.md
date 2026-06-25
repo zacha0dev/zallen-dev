@@ -1,3 +1,5 @@
+[mcp-node](../README.md) · [Docs](README.md)
+
 # Connecting a client
 
 After install, your node prints a connect block. Each artificial intelligence
