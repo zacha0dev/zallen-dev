@@ -48,40 +48,11 @@ built.
 
 ## What it is made of
 
-```
-                 You + your AI  (Claude / ChatGPT)
-                            |
-                 OAuth:  /authorize -> /token -> bearer
-                            v
-   ============================ NODE ============================
-     one resource group  ·  scale-to-zero  ·  ~$10/mo cap
-
-     FUNCTION APP  =  the MCP server
-       /authorize  /token .... your OAuth flow
-       /mcp .................. the AI's tool endpoint
-       tools:
-         [Azure]   deploy · rg-create · app-settings · spend
-         [GitHub]  read · commit · PR · dispatch-deploy
-         [self]    logs · status · knowledge (kb)
-
-     KEY VAULT            MANAGED IDENTITY        COST GUARD
-       oauth id/secret      scoped to THIS RG       $10 + throttle
-       bearer · secrets     (cannot wander)         App Insights
-   ==============================================================
-            |                                   |
-      GitHub tools:                        Azure tools:
-      edit code -> dispatch deploy         act only on its own RG
-            |  (self-update loop)               |
-            v                                   v
-      [ its own repo ] -> rebuilds itself  stamp new capped nodes
-                                           [node $10] [node $X] ...
-```
-
-A Function App holds the OAuth endpoints and the `/mcp` tool endpoint. A Key Vault
-holds its keys. A Managed Identity scopes it to that one resource group so it
-cannot wander. A cost guard caps and throttles spend and ships the logs. The AI
-connects in by OAuth, then reaches back out through the Azure and GitHub tools to
-run, rebuild, and extend itself.
+A Function App is the MCP server: it holds the OAuth endpoints and the tool
+endpoint the AI calls. A Key Vault holds its keys. A Managed Identity scopes it to
+its one resource group so it cannot wander. A cost guard caps and throttles spend
+and ships the logs. The AI connects in by OAuth, then reaches back out through the
+Azure and GitHub tools to run, rebuild, and extend itself.
 
 ## Follow along
 
