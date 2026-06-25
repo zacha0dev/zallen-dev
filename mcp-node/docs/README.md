@@ -1,3 +1,5 @@
+[← mcp-node](../README.md)
+
 # mcp-node docs
 
 A learning resource for understanding the system. You already installed it from
