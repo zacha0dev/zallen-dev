@@ -63,6 +63,10 @@ Action redeploys. Full loop in `src/kb/extending.md` and `src/kb/operating.md`.
 One RG, one budget. ~$10/month by default (`monthlyCapUsd`), alerts at
 50/80/100%. Idle costs next to nothing.
 
+## Docs
+
+[How it works](docs/how-it-works.md) - every component and how they connect.
+
 ## Version
 
 v1.0
