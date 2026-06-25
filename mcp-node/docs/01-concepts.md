@@ -64,11 +64,16 @@ the very node it is talking to.
 
 ## What a "node" is
 
-A node is one self-contained MCP server plus the cloud it manages, deployed as a
-single unit: a Function App, in its own resource group (RG), with tools to
-operate that RG and its own code. **Single-tenant** means one owner, one
-connection, full access - no multi-user permission system, because it is yours
-alone. That simplification is what keeps it light.
+A node is one resource group (RG) - your own isolated, cost-capped box in Azure -
+with an MCP server running inside it that manages that box. **One node = one
+resource group.** The server (a Function App), its tools, its secrets, and its
+cost cap all live in that single RG.
+
+**Single-tenant** means one owner, one connection, full access - no multi-user
+permission system, because the node is yours alone. That keeps it light.
+
+You expand by adding more nodes: each new node is another resource group, its own
+capped box, the same shape. One to start, more as you grow. ([Scaling](08-scaling.md).)
 
 ## The open-box idea
 
