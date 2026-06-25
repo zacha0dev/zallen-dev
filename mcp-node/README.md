@@ -33,8 +33,10 @@ needs, deploys, and prints your connect config.
 It is an open box, not a fixed product. An AI client (Claude, ChatGPT, any MCP
 client) connects over OAuth and can:
 
-- **deploy infra in one shot** - spin resources straight into your capped Azure
-  sandbox from a sentence (no template library; you describe it, it deploys it)
+- **deploy infra in one shot** - "deploy a small VM" and it does, straight into
+  your capped Azure sandbox. No template library; you describe it, it deploys it,
+  following a clean naming + tagging convention so the group stays human-readable
+  and easy to tear down (`src/kb/infra.md`)
 - **add your own tools and 3rd-party connectors** - wrap an API as a tool and a
   GitHub Action redeploys the node with it, the same way larger MCP toolsets are
   built up; that is how the box grows on Azure
