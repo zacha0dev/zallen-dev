@@ -23,6 +23,9 @@ asks a few questions, deploys, and prints your connect config.
 No agent CLI? Run `./scripts/deploy.sh` (or `scripts/deploy.ps1` on Windows)
 instead - it does the same thing.
 
+New to this? [Prereqs - do this first](install/prereqs.md) has the one-line
+installs for an agent CLI and Azure, with links.
+
 ## What it does
 
 It is an open box, not a fixed product. An AI client (Claude, ChatGPT, any MCP
