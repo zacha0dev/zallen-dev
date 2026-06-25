@@ -1,0 +1,29 @@
+name: Repurpose wipe (keep README + posts)
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  wipe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Remove everything except README.md and posts/
+        run: |
+          find . -mindepth 1 -maxdepth 1 \
+            ! -name '.git' \
+            ! -name 'README.md' \
+            ! -name 'posts' \
+            -exec rm -rf {} +
+
+      - name: Commit and push the clean tree
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Repurpose: wipe portfolio app; keep README + posts" || echo "nothing to commit"
+          git push
