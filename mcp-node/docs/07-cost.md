@@ -1,4 +1,4 @@
-[mcp-node](../README.md) · [Docs](README.md) · [← Infrastructure](06-infrastructure.md) · [Scaling →](08-scaling.md)
+← [All docs](README.md)
 
 # Cost
 
