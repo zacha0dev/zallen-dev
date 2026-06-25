@@ -1,4 +1,4 @@
-[mcp-node](../README.md) · [Docs](README.md) · [Architecture →](02-architecture.md)
+← [All docs](README.md)
 
 # Concepts: what the Model Context Protocol is
 
