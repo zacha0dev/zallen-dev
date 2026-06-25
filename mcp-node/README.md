@@ -7,15 +7,15 @@ to zero when idle.
 
 ## Install
 
-Prereq: `az login`. Then paste this one line into an agentic CLI (Claude Code,
-Codex, Copilot, Gemini):
+Paste this one line into an agentic CLI (Claude Code, Codex, Copilot, Gemini):
 
 ```
 Install mcp-node: read and follow https://github.com/zacha0dev/zallen-dev/blob/main/mcp-node/install/agent.md
 ```
 
-The agent reads the instructions, asks only for what it needs, deploys it, and
-prints your connect config.
+The agent checks your tools (and installs anything missing), runs `az login` if
+you are not signed in, asks only for what it needs, deploys it, and prints your
+connect config.
 
 ## What it does
 
