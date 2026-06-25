@@ -10,8 +10,14 @@ Your connect block has:
 - **OAuth Client ID** and **OAuth Client Secret**
 - **Bearer token** - for command-line clients
 
-(Lost it? Read the values back from your node's Key Vault: `oauth-client-id`,
-`oauth-client-secret`, `mcp-bearer-token`.)
+Lost it? Read the values back from your node's Key Vault (`<node-kv>` is the
+`keyVaultName` deploy output):
+
+```
+az keyvault secret show --vault-name <node-kv> --name oauth-client-id     --query value -o tsv
+az keyvault secret show --vault-name <node-kv> --name oauth-client-secret --query value -o tsv
+az keyvault secret show --vault-name <node-kv> --name mcp-bearer-token    --query value -o tsv
+```
 
 ## Claude (claude.ai connector)
 
