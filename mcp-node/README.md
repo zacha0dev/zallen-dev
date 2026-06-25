@@ -70,6 +70,15 @@ each a fresh resource group with its own cost cap. Two ways:
   `azure_deploy_template` - create a capped RG and deploy a sibling node into it.
   Off until you run it; revoke any time with the command the script prints.
 
+## Extend it
+
+The node is yours to grow. Ask the connected AI to add a tool and it edits the
+Function App's tool modules through the node's own GitHub tools, then redeploys -
+the same loop that built it. Tools are small modules under `src/tools`; the
+process lives in the node's own context (`src/kb/extending.md`) so the AI can
+follow it when you prompt. Open by design - build and explore as far as you want;
+the base set is just the start.
+
 ## Cost
 
 One resource group, one budget. Default ~$10/month, set via `monthlyCapUsd`.
