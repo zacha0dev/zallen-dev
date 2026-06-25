@@ -1,12 +1,31 @@
 // mcp.js - the MCP endpoint. Speaks JSON-RPC 2.0 over HTTP: initialize,
 // tools/list, tools/call. Every request must carry the node's bearer token
 // (Authorization: Bearer <mcp-bearer-token>), which clients obtain from the
-// OAuth flow in oauth.js.
+// OAuth flow in oauth.js. On initialize the server also hands the client the
+// node's custom instructions (src/instructions.md).
 const { app } = require("@azure/functions");
+const fs = require("fs");
+const path = require("path");
 const { getSecret } = require("../lib/secrets");
 const registry = require("../tools");
 
 const PROTOCOL_VERSION = "2024-11-05";
+
+// The node's custom instructions - standing guidance the client receives on
+// connect. Edit src/instructions.md and redeploy to change how the AI behaves.
+let instructionsCache;
+function nodeInstructions() {
+  if (instructionsCache !== undefined) return instructionsCache;
+  try {
+    instructionsCache = fs.readFileSync(
+      path.join(__dirname, "..", "instructions.md"),
+      "utf8"
+    );
+  } catch {
+    instructionsCache = "";
+  }
+  return instructionsCache;
+}
 
 function rpcResult(id, result) {
   return { jsonrpc: "2.0", id, result };
@@ -54,6 +73,7 @@ app.http("mcp", {
               protocolVersion: PROTOCOL_VERSION,
               capabilities: { tools: {} },
               serverInfo: { name: "mcp-node", version: "1.0" },
+              instructions: nodeInstructions(),
             }),
           };
 
