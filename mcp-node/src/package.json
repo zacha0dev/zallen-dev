@@ -1,0 +1,18 @@
+{
+  "name": "mcp-node-server",
+  "version": "1.0.0",
+  "description": "The mcp-node MCP server: OAuth + MCP endpoint + self-manage tools, on Azure Functions.",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "func start",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.5.0",
+    "@azure/identity": "^4.4.0",
+    "@azure/keyvault-secrets": "^4.8.0"
+  }
+}
