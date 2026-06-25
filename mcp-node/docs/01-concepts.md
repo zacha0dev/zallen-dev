@@ -24,10 +24,16 @@ mcp-node is an MCP server.
 
 ## What a tool is
 
-A tool is a named action with a typed input. The server advertises each tool's
-**name**, a **description** (so the model knows when to use it), and an **input
-schema** (what arguments it takes). For example, a tool `azure_spend` with no
-inputs that returns this month's cost.
+A tool is one specific thing the server can do for the AI - like "check this
+month's cost" or "deploy a server." Each tool comes with:
+
+- a **name** the AI uses to ask for it,
+- a plain **description** so the AI knows when it is the right one to use,
+- a list of any **details it needs** to do the job (for example, a city name, or
+  how big to make something). Some tools need no details at all.
+
+For example, a tool called `azure_spend` needs no details and just returns this
+month's cost.
 
 ## How a call actually happens
 
