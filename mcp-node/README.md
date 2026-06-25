@@ -1,8 +1,9 @@
 # mcp-node
 
-An open, single-tenant MCP node. Stand one up and let an AI deploy and explore
-freely in your own Azure - one resource group, capped at ~$10/month, scaled to
-zero when idle. Each node is the same base, and a node can stamp the next.
+An open, single-tenant MCP node: stand one up and let an AI deploy and explore
+freely in your own Azure, safely. One resource group, capped at ~$10/month,
+scaled to zero when idle. Each node is the same base, and a node can stamp the
+next.
 
 ## Install
 
@@ -22,50 +23,26 @@ No agent CLI? Run `scripts/deploy.sh` (or `scripts/deploy.ps1`) instead.
 
 ## What it does
 
-An open box, not a fixed product. A connected AI can:
+A connected AI (Claude, ChatGPT, any MCP client) can:
 
 - **deploy infra in one shot** - "deploy a small VM" and it does, cleanly named
-  and tagged (`src/kb/infra.md`)
+  and tagged
 - **add its own tools / 3rd-party connectors** - wrap an API as a tool; a GitHub
   Action redeploys the node with it
 - read its status and spend, manage its resource group and repo
 - update itself, and stamp more capped nodes
 
-Day one is the floor; you expand it by using it.
-
-## Architecture
-
-- **Function App** (Consumption, scale-to-zero) - the MCP server: `/authorize`,
-  `/token`, `/mcp`.
-- **Tools** - azure (resources, spend), github (read, commit, deploy), self
-  (status, kb), scale (create + cap + deploy other RGs).
-- **Key Vault** - OAuth + bearer secrets. **Managed identity** scoped to this RG.
-- **Cost guard** - per-RG budget (~$10) with alerts + forecast.
+Day one is the floor, not the ceiling.
 
 ## Connect
 
-- **Claude**: OAuth client id + secret.
-- **ChatGPT**: server URL + authorize + token + id + secret + scopes.
-- **CLI**: MCP URL + bearer.
-
-## Scaling
-
-Start with one node. For another, either re-run the install (new name, own RG),
-or run `scripts/enable-scaling.sh` once to let the node stamp siblings itself.
-
-## Extend it
-
-Fork the repo, then ask the AI to add a tool - it edits `src/tools` and a GitHub
-Action redeploys. Full loop in `src/kb/extending.md` and `src/kb/operating.md`.
-
-## Cost
-
-One RG, one budget. ~$10/month by default (`monthlyCapUsd`), alerts at
-50/80/100%. Idle costs next to nothing.
+After install you get a connect block. Step-by-step per client (Claude / ChatGPT
+/ CLI): [Connecting a client](docs/connect.md).
 
 ## Docs
 
-[How it works](docs/how-it-works.md) - every component and how they connect.
+[How it works](docs/) - concepts, architecture, auth, the server, tools,
+infrastructure, cost, scaling, extending.
 
 ## Version
 
