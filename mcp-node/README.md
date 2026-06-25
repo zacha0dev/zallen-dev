@@ -111,11 +111,13 @@ built, it stops feeling abstract.
 - **AI as an operator, not an oracle.** The question stops being "what will it
   say?" and becomes "what will it do, and how do I shape that?"
 
-## Status (honest)
+## Version
 
-An emerging build, shared as a pattern you can stand up yourself; not a polished
-one-click product yet. The pieces are real and running; the smooth installer is
-being packaged. Follow along as it hardens, and tell me where it breaks.
+**v0.1** - the node deploys, self-manages, caps its own spend, and connects Claude
+or ChatGPT today.
+
+- **v0.2** - one-command setup script
+- **v0.3** - one-click deploy
 
 ---
 
