@@ -25,6 +25,13 @@ param alertEmail string
 @description('Daily Log Analytics ingestion cap (GB) - cost knob.')
 param logDailyQuotaGb int = 1
 
+@description('Object id of the principal running this deploy: az ad signed-in-user show --query id -o tsv. Granted Key Vault Secrets Officer so it can seed/rotate the OAuth secrets. On an RBAC vault, subscription Owner alone does NOT grant data-plane secret access - this is the reader-role wall.')
+param installerObjectId string
+
+@description('Principal type of installerObjectId: User for a person, ServicePrincipal for an SP/CI.')
+@allowed([ 'User', 'ServicePrincipal' ])
+param installerPrincipalType string = 'User'
+
 var suffix = take(uniqueString(resourceGroup().id), 6)
 var saName = toLower('${nodeName}${suffix}')
 var kvName = '${nodeName}-kv-${suffix}'
