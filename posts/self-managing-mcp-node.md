@@ -52,9 +52,9 @@ boundaries first:
 - **One node = one resource group.** The AI's identity is scoped to *that* group
   and nothing else. It can't wander your account.
 - **A hard cost cap.** Every resource group ships with a monthly budget — default
-  around **$10** — with alerts at 50/80/100% *and* a throttle that throctles the
-  thing down to near-nothing if it ever hits the ceiling. Pick a bigger number if
-  you want more room; it's one parameter.
+  around **$10** — with alerts at 50/80/100% *and* a throttle that drops the node
+  to near-nothing if it ever hits the ceiling. Pick a bigger number if you want
+  more room; it's one parameter.
 - **Scale-to-zero.** The server costs essentially nothing when idle. A node you're
   not using rounds to free.
 - **Your own auth.** Connecting is a normal OAuth handshake to *your* node. You
