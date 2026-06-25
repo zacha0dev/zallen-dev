@@ -2,7 +2,7 @@
   "name": "mcp-node-server",
   "version": "1.0.0",
   "description": "The mcp-node MCP server: OAuth + MCP endpoint + self-manage tools, on Azure Functions.",
-  "main": "src/index.js",
+  "main": "index.js",
   "engines": {
     "node": ">=20"
   },
