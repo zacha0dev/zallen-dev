@@ -1,4 +1,4 @@
-[mcp-node](../README.md) · [Docs](README.md) · [← Cost](07-cost.md) · [Extending →](09-extending.md)
+← [All docs](README.md)
 
 # Scaling
 
