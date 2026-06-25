@@ -1,0 +1,38 @@
+# deploy.yml - the node's self-deploy workflow (template).
+#
+# Copy this to .github/workflows/deploy.yml in the repo that hosts your node,
+# then the node can update itself by calling its github_dispatch_workflow tool
+# (workflow: deploy.yml). It can also be run manually from the Actions tab.
+#
+# Required repo secrets:
+#   AZURE_CREDENTIALS   - output of `az ad sp create-for-rbac --sdk-auth`,
+#                         scoped to the node's resource group.
+#   FUNCTION_APP_NAME   - the deployed Function App name (from the bicep output).
+name: deploy
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install
+        working-directory: mcp-node/src
+        run: npm ci
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Publish Function App
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ secrets.FUNCTION_APP_NAME }}
+          package: mcp-node/src
