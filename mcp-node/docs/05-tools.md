@@ -1,3 +1,5 @@
+[mcp-node](../README.md) · [Docs](README.md) · [← The server](04-server.md) · [Infrastructure →](06-infrastructure.md)
+
 # The tools
 
 How a tool is defined, how a call is triggered and dispatched, and what ships
