@@ -7,15 +7,22 @@ to zero when idle.
 
 ## Install
 
-Paste this one line into an agentic CLI (Claude Code, Codex, Copilot, Gemini):
+Two steps. You do not install Azure CLI / Node / Functions tools by hand - that
+happens automatically in step 2.
 
-```
-Install mcp-node: read and follow https://github.com/zacha0dev/zallen-dev/blob/main/mcp-node/install/agent.md
-```
+**1. Prereq** - have one of these (you probably already do):
+- an agent CLI: Claude Code, Codex, Copilot, or Gemini, or
+- bash or PowerShell (for the plain script).
 
-The agent checks your tools (and installs anything missing), runs `az login` if
-you are not signed in, asks only for what it needs, deploys it, and prints your
-connect config.
+**2. Run it:**
+- Agent - paste this one line:
+  ```
+  Install mcp-node: read and follow https://github.com/zacha0dev/zallen-dev/blob/main/mcp-node/install/agent.md
+  ```
+- Script - `./scripts/deploy.sh` (or `scripts/deploy.ps1` on Windows).
+
+Either way it installs any missing tools, runs `az login`, asks only for what it
+needs, deploys, and prints your connect config.
 
 ## What it does
 
