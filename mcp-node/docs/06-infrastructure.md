@@ -1,3 +1,5 @@
+[mcp-node](../README.md) · [Docs](README.md) · [← The tools](05-tools.md) · [Cost →](07-cost.md)
+
 # Infrastructure
 
 `infra/node.bicep`, resource by resource. One file, deployed into one resource
