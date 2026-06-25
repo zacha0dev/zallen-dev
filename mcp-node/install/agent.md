@@ -2,50 +2,98 @@
 
 You are installing mcp-node: a single-tenant, self-managing MCP server that
 lives in one Azure resource group, capped at about $10/month, scaled to zero
-when idle. Drive this to done. Ask the user only for inputs you cannot safely
-infer, then run it all and print the connect config at the end.
+when idle. Drive this to done. Check the machine has what it needs, handle the
+logins, ask the user only for inputs you cannot safely infer, then run it all
+and print the connect config at the end.
 
-1. Confirm `az account show` works (logged in to the right subscription). If
-   not, tell the user to run `az login` and stop. Confirm you can read
-   `mcp-node/infra/node.bicep`; if not, clone
-   https://github.com/zacha0dev/zallen-dev and cd into it.
+## 0. Prerequisites - check, install what is missing, then log in
 
-2. Ask the user for, with these defaults if they do not care:
-   - node name (default mcpnode, 3-12 lowercase chars)
-   - region (default eastus)
-   - resource group (default rg-<nodeName>)
-   - monthly cap USD (default 10)
-   - alert email (required; where budget alerts go)
-   Echo the set back in one line before creating anything.
+Check each tool; if it is missing, install it (use the platform's package
+manager: `brew` on macOS, `apt`/`dnf` on Linux, `winget` on Windows), then
+re-check. Do not continue past a tool you could not get working; tell the user
+the one command they need to run and stop.
 
-3. `az group create -n <rg> -l <region>`
+- **Azure CLI** (`az`): `az version`. If missing, install it
+  (macOS `brew install azure-cli`; Windows `winget install Microsoft.AzureCLI`;
+  Linux per https://learn.microsoft.com/cli/azure/install-azure-cli).
+- **Node.js 20+ and npm**: `node -v` (need >= 20). If missing, install Node 20.
+- **Azure Functions Core Tools** (`func`): `func --version` (need v4). If
+  missing: `npm i -g azure-functions-core-tools@4 --unsafe-perm true`.
+- **openssl**: `openssl version` (used to generate the OAuth secrets). Usually
+  present; install if missing.
+- **git**: needed only if you must clone this repo. `git --version`.
+- **GitHub CLI** (`gh`): optional, only if the user wants the node's GitHub
+  self-manage tools (see step 6b). `gh --version`.
 
-4. Deploy, with budgetStartDate = first of this month (YYYY-MM-01):
-   ```
-   az deployment group create -g <rg> -f mcp-node/infra/node.bicep \
-     -p nodeName=<nodeName> monthlyCapUsd=<cap> alertEmail=<email> \
-        budgetStartDate=<YYYY-MM-01>
-   ```
-   Capture outputs: functionAppName, keyVaultName, functionHostName.
+Then handle Azure login:
+- Run `az account show`. If it errors, run `az login` and let the user complete
+  it in the browser.
+- If the user has more than one subscription, list them
+  (`az account list -o table`) and confirm which one to use; set it with
+  `az account set --subscription <id>`.
 
-5. Generate three random values (`openssl rand -hex 32`) and write them to the
-   node's Key Vault as `oauth-client-id`, `oauth-client-secret`,
-   `mcp-bearer-token`. Do not print them yet.
+Confirm you can read `mcp-node/infra/node.bicep`. If not, clone
+https://github.com/zacha0dev/zallen-dev and cd into it.
 
-6. From `mcp-node/src`: `npm ci`, `npm run build --if-present`, then
-   `func azure functionapp publish <functionAppName>`. If publish fails, show
-   the real error and stop; do not fake success.
+## 1. Collect inputs
 
-7. GET `https://<functionHostName>/mcp` to confirm it responds. Read the three
-   secrets back and print the connect block:
-   - Node URL: `https://<host>` with `/authorize`, `/token`, `/mcp`
-   - Claude: client id + client secret
-   - ChatGPT: server URL + authorize URL + token URL + client id + client
-     secret + scopes=mcp
-   - CLI (Claude Code / Codex): mcp URL + bearer
+Ask the user for, with these defaults if they do not care:
+- node name (default mcpnode, 3-12 lowercase chars)
+- region (default eastus)
+- resource group (default rg-<nodeName>)
+- monthly cap USD (default 10)
+- alert email (required; where budget alerts go)
 
-8. Tell the user the resource group, the monthly cap, and where budget alerts
-   go.
+Echo the set back in one line before creating anything.
+
+## 2. Create the resource group
+
+`az group create -n <rg> -l <region>`
+
+## 3. Deploy the infrastructure
+
+budgetStartDate = first of this month (YYYY-MM-01):
+```
+az deployment group create -g <rg> -f mcp-node/infra/node.bicep \
+  -p nodeName=<nodeName> monthlyCapUsd=<cap> alertEmail=<email> \
+     budgetStartDate=<YYYY-MM-01>
+```
+Capture outputs: functionAppName, keyVaultName, functionHostName. This also
+grants the node's managed identity Contributor on this resource group only.
+
+## 4. Seed the OAuth secrets
+
+Generate three random values (`openssl rand -hex 32`) and write them to the
+node's Key Vault as `oauth-client-id`, `oauth-client-secret`,
+`mcp-bearer-token`. Do not print them yet.
+
+## 5. Deploy the server code
+
+From `mcp-node/src`: `npm ci`, `npm run build --if-present`, then
+`func azure functionapp publish <functionAppName>`. If publish fails, show the
+real error and stop; do not fake success.
+
+## 6. (Optional) GitHub self-manage
+
+If the user wants the node to manage its own repo (read/commit/dispatch deploy),
+get a GitHub token (the user can paste a fine-grained PAT, or run
+`gh auth token` if `gh` is logged in) and write it to the node's Key Vault as
+`github-token`. Skip this if they do not want the GitHub tools yet; the rest of
+the node works without it.
+
+## 7. Verify and print the connect config
+
+GET `https://<functionHostName>/mcp` to confirm it responds. Read the three
+secrets back and print:
+- Node URL: `https://<host>` with `/authorize`, `/token`, `/mcp`
+- Claude (claude.ai connector): client id + client secret
+- ChatGPT (custom MCP connector): server URL + authorize URL + token URL +
+  client id + client secret + scopes=mcp
+- CLI (Claude Code / Codex): mcp URL + bearer
+
+## 8. Report
+
+Tell the user the resource group, the monthly cap, and where budget alerts go.
 
 Rules: deploy only into the one resource group you create; do not raise the cap
 without asking; on any failure, stop and show the real error.
