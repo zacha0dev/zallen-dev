@@ -118,8 +118,7 @@ debug loop, and adding a tool's API key - is in `kb/extending.md` and
 | Self-deploy workflow | `deploy/deploy.yml` |
 | Enable self-scaling | `scripts/enable-scaling.sh` |
 
-## A reading order
+## Reading order
 
 `README.md` -> this file -> `src/functions/mcp.js` -> `src/tools/self.js` ->
-`src/kb/`. That path takes you from the shape to a real tool to the node's own
-knowledge in about fifteen minutes.
+`src/kb/`.
