@@ -1,11 +1,9 @@
-# deploy.ps1 - stand up one mcp-node into one resource group (PowerShell).
-# Mirror of deploy.sh for Windows.
+# deploy.ps1 - one setup script for Windows: check prerequisites, log in, then
+# stand up one mcp-node into one resource group. Mirror of deploy.sh.
 #
 # Usage:
 #   $env:ALERT_EMAIL="you@example.com"; ./deploy.ps1
 #   (NODE_NAME, REGION, RG, CAP_USD are optional env vars.)
-#
-# Prereqs: az (logged in), Azure Functions Core Tools (func), node/npm.
 
 $ErrorActionPreference = "Stop"
 
@@ -18,30 +16,68 @@ if (-not $AlertEmail) { throw "Set ALERT_EMAIL to where budget alerts should go.
 $BudgetStart = (Get-Date).ToString("yyyy-MM-01")
 $Here = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 
-Write-Host "==> Confirming Azure login"
-az account show --query "{subscription:name, id:id}" -o table
+# --- prerequisites -----------------------------------------------------------
+function Have($cmd) { [bool](Get-Command $cmd -ErrorAction SilentlyContinue) }
+function Need($cmd, $wingetId, $hint) {
+  if (Have $cmd) { Write-Host "  ok  $cmd"; return }
+  if (Have winget) {
+    Write-Host "  .. installing $cmd"
+    winget install --id $wingetId --silent --accept-package-agreements --accept-source-agreements
+  }
+  if (-not (Have $cmd)) { throw "  !! $cmd not found. $hint" }
+}
 
+Write-Host "==> Checking prerequisites"
+Need az   "Microsoft.AzureCLI"               "Install Azure CLI."
+Need node "OpenJS.NodeJS.LTS"                "Install Node.js 20+."
+if (-not (Have func)) {
+  Write-Host "  .. installing Azure Functions Core Tools"
+  winget install --id Microsoft.AzureFunctionsCoreTools --silent --accept-package-agreements --accept-source-agreements
+  if (-not (Have func)) { npm i -g azure-functions-core-tools@4 --unsafe-perm true }
+}
+if (-not (Have func)) { throw "  !! func not found. npm i -g azure-functions-core-tools@4" }
+Write-Host "  ok  func"
+
+# --- login -------------------------------------------------------------------
+Write-Host "==> Confirming Azure login"
+az account show 2>$null | Out-Null
+if ($LASTEXITCODE -ne 0) { Write-Host "  .. not logged in; launching az login"; az login | Out-Null }
+az account show --query "{subscription:name, id:id}" -o table
+$InstallerOid = az ad signed-in-user show --query id -o tsv
+
+# --- deploy ------------------------------------------------------------------
 Write-Host "==> Creating resource group $Rg in $Region"
 az group create -n $Rg -l $Region -o none
 
 Write-Host "==> Deploying node.bicep"
 $OutJson = az deployment group create -g $Rg `
   -f "$Here/infra/node.bicep" `
-  -p nodeName=$NodeName monthlyCapUsd=$CapUsd alertEmail=$AlertEmail budgetStartDate=$BudgetStart `
+  -p nodeName=$NodeName monthlyCapUsd=$CapUsd alertEmail=$AlertEmail budgetStartDate=$BudgetStart installerObjectId=$InstallerOid installerPrincipalType=User `
   --query properties.outputs -o json
 $Out = $OutJson | ConvertFrom-Json
 $FuncName = $Out.functionAppName.value
 $KvName   = $Out.keyVaultName.value
 $Host_    = $Out.functionHostName.value
 
+# --- seed secrets (retry while the KV role assignment propagates) ------------
 Write-Host "==> Seeding OAuth secrets into $KvName"
 $ClientId     = -join ((1..32)  | ForEach-Object { "{0:x}" -f (Get-Random -Max 16) })
 $ClientSecret = -join ((1..64)  | ForEach-Object { "{0:x}" -f (Get-Random -Max 16) })
 $Bearer       = -join ((1..64)  | ForEach-Object { "{0:x}" -f (Get-Random -Max 16) })
-az keyvault secret set --vault-name $KvName --name oauth-client-id     --value $ClientId     -o none
-az keyvault secret set --vault-name $KvName --name oauth-client-secret --value $ClientSecret -o none
-az keyvault secret set --vault-name $KvName --name mcp-bearer-token    --value $Bearer       -o none
+function KvSet($name, $value) {
+  for ($i = 1; $i -le 6; $i++) {
+    az keyvault secret set --vault-name $KvName --name $name --value $value -o none 2>$null
+    if ($LASTEXITCODE -eq 0) { return }
+    Write-Host "  .. waiting for Key Vault access to propagate (attempt $i)"
+    Start-Sleep -Seconds 10
+  }
+  throw "  !! could not write $name to $KvName"
+}
+KvSet oauth-client-id     $ClientId
+KvSet oauth-client-secret $ClientSecret
+KvSet mcp-bearer-token    $Bearer
 
+# --- publish -----------------------------------------------------------------
 Write-Host "==> Publishing the server"
 Push-Location "$Here/src"
 npm ci
