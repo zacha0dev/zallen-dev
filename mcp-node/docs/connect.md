@@ -1,4 +1,4 @@
-[mcp-node](../README.md) · [Docs](README.md)
+← [All docs](README.md)
 
 # Connecting a client
 
