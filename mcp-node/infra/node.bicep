@@ -105,14 +105,31 @@ resource kv 'Microsoft.KeyVault/vaults@2023-07-01' = {
   }
 }
 
-// The Function App's identity may read secrets from THIS vault only.
-resource kvRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(kv.id, func.id, kvSecretsUserRoleId)
+// The node's identity may READ AND ROTATE secrets in THIS vault (Secrets
+// Officer, not the read-only Secrets User) so the node can self-update its own
+// OAuth secrets. Scoped to this vault only.
+resource kvNodeRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(kv.id, func.id, kvSecretsOfficerRoleId)
   scope: kv
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', kvSecretsUserRoleId)
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', kvSecretsOfficerRoleId)
     principalId: func.identity.principalId
     principalType: 'ServicePrincipal'
+  }
+}
+
+// The installer (the person/SP running the deploy) also gets Secrets Officer on
+// the vault so the next step - seeding oauth-client-id / -secret /
+// mcp-bearer-token - works. On an RBAC vault, subscription Owner does NOT carry
+// data-plane secret access; without this, `az keyvault secret set` returns
+// Forbidden. This is the reader-role wall, closed here.
+resource kvInstallerRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(kv.id, installerObjectId, kvSecretsOfficerRoleId)
+  scope: kv
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', kvSecretsOfficerRoleId)
+    principalId: installerObjectId
+    principalType: installerPrincipalType
   }
 }
 
