@@ -15,4 +15,7 @@ Read top to bottom, or jump to what you need.
 8. [Scaling](08-scaling.md) - one node to many.
 9. [Extending](09-extending.md) - add your own tools and connectors.
 
+Setup how-to: [Connecting a client](connect.md) - per-client (Claude / ChatGPT /
+CLI) step-by-step.
+
 Convention: acronyms are spelled out on first use in each page, then used short.
