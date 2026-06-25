@@ -7,67 +7,27 @@ to zero when idle.
 
 ## Install
 
-You do not run an installer by hand. You paste one prompt into an agentic CLI
-and it deploys the whole thing, then prints your connect config.
+Prereq: `az login` (Azure CLI logged in to the subscription you want).
 
-Works in any agent CLI that runs shell commands: Claude Code (`claude`), OpenAI
-Codex (`codex`), GitHub Copilot (`copilot`), Gemini (`gemini`).
-
-First, two prereqs on the machine the agent runs on:
-
-1. `az login` (Azure CLI logged in to the subscription you want).
-2. This repo available locally, or let the agent clone it.
-
-Then copy this whole block and paste it into your agent CLI:
+Paste this one line into an agentic CLI (Claude Code, Codex, Copilot, Gemini):
 
 ```
-Install "mcp-node" from https://github.com/zacha0dev/zallen-dev (folder
-mcp-node). It is a single-tenant, self-managing MCP server that lives in one
-Azure resource group, capped at about $10/month, scaled to zero when idle.
-Drive this to done; ask me only for inputs you cannot safely infer, then run it
-all and print the connect config at the end.
-
-1. Confirm `az account show` works (I am logged in to the right subscription).
-   Confirm you can read mcp-node/infra/node.bicep here; if not, clone the repo
-   above and cd in.
-2. Ask me for: node name (default mcpnode, 3-12 lowercase chars), region
-   (default eastus), resource group (default rg-<nodeName>), monthly cap USD
-   (default 10), and alert email (required). Echo the set back in one line.
-3. az group create -n <rg> -l <region>
-4. Deploy with budgetStartDate = first of this month (YYYY-MM-01):
-   az deployment group create -g <rg> -f mcp-node/infra/node.bicep \
-     -p nodeName=<nodeName> monthlyCapUsd=<cap> alertEmail=<email> \
-        budgetStartDate=<YYYY-MM-01>
-   Capture outputs: functionAppName, keyVaultName, functionHostName.
-5. Generate three random values (openssl rand -hex 32) and write them to the
-   node's Key Vault as oauth-client-id, oauth-client-secret, mcp-bearer-token.
-   Do not print them yet.
-6. From mcp-node/src: npm ci, npm run build --if-present, then
-   func azure functionapp publish <functionAppName>. If publish fails, show me
-   the real error and stop.
-7. GET https://<functionHostName>/mcp to confirm it responds. Read the three
-   secrets back and print the connect block: node URL + /authorize + /token +
-   /mcp; Claude (client id + secret); ChatGPT (URL + authorize + token + id +
-   secret + scopes=mcp); CLI (mcp URL + bearer).
-8. Tell me the resource group, the monthly cap, and where budget alerts go.
-
-Rules: deploy only into the one resource group you create; do not raise the cap
-without asking; on any failure, stop and show the real error.
+Install mcp-node: read and follow https://github.com/zacha0dev/zallen-dev/blob/main/mcp-node/install/agent.md
 ```
 
-That is the install. Same prompt again with a different node name stands up
-another node.
+The agent reads the instructions, asks only for what it needs (node name,
+region, cost cap, alert email), deploys the whole thing, and prints your connect
+config. Run it again with a different node name to stand up another node.
 
-Prefer a plain script? `scripts/deploy.sh` (bash) and `scripts/deploy.ps1`
-(PowerShell) run the identical steps. The longer walkthrough is in
-`install/one-shot.md`.
+Prefer no agent? `scripts/deploy.sh` (bash) or `scripts/deploy.ps1` (PowerShell)
+run the same steps directly.
 
 ## What it does
 
 An AI client (Claude, ChatGPT, any MCP client) connects over OAuth and can:
 
 - deploy and update the node itself
-- read its own logs and status
+- read its own status and spend
 - manage its resource group (Azure) and its repo (GitHub)
 - stand up new nodes, each with its own cost cap
 
@@ -97,7 +57,8 @@ mcp-node/
     lib/secrets.js        Key Vault access via managed identity
     tools/                self, azure, github tool modules + registry
     kb/                   baked-in knowledge pack (kb_search reads this)
-  install/one-shot.md     the install prompt, with the walkthrough
+  install/agent.md        the instructions the install line points the agent to
+  install/one-shot.md     the same steps as a walkthrough you can read
   scripts/deploy.sh       deterministic installer (bash)
   scripts/deploy.ps1      deterministic installer (PowerShell)
   deploy/deploy.yml       self-deploy workflow template
