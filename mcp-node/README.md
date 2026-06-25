@@ -1,3 +1,5 @@
+[← zallen-dev](../README.md)
+
 # mcp-node
 
 An open, single-tenant MCP node: stand one up and let an AI deploy and explore
