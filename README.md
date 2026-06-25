@@ -1,14 +1,13 @@
-# zallen.dev — building with AI, hands-on
+# zallen.dev - building with AI, hands-on
 
 An engineering journal: short, follow-along explainers about building real things
-with AI — readable whether you write code or not.
+with AI, readable whether you write code or not.
 
-## Start here
+## Projects
 
-- **[An AI that runs its own cloud](posts/self-managing-mcp-node.md)** — the
-  self-managing MCP node: stand up a small piece of cloud an AI can run, fix, and
-  extend itself, inside a sandbox it can't escape and a ~$10/mo budget it can't blow.
+- **[mcp-node](mcp-node/)** - An AI that runs its own cloud: a self-managing MCP
+  node you can stand up for about $10/month and explore.
 
-More explainers to come.
+More to come.
 
-— Zachary Allen · [github.com/zacha0dev](https://github.com/zacha0dev)
+- Zachary Allen, [github.com/zacha0dev](https://github.com/zacha0dev)
