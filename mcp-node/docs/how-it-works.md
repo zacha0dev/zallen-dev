@@ -1,7 +1,6 @@
 # How mcp-node works
 
-A walkthrough of every piece, so you can read it, learn it, and build on it.
-Start at the top for the shape, then follow the parts.
+Technical reference for every component and how they connect.
 
 ## The shape
 
