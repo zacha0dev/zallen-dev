@@ -1,9 +1,13 @@
 # mcp-node
 
-A single-tenant, self-managing MCP node: one Azure resource group running an MCP
-server an AI connects to, with the tools for that AI to operate the node's own
-cloud and code. Scoped to one resource group, capped at about $10/month, scaled
-to zero when idle.
+An open, single-tenant MCP node: stand one up and let an AI explore and deploy
+freely in your own Azure, safely. It is one resource group running an MCP server
+the AI connects to, with the tools for it to operate that group's cloud and
+code. Scoped to the one group, capped at about $10/month, scaled to zero when
+idle - so "explore freely" can't run away or touch anything else.
+
+It is also the base things stack on: each node is the same foundation, and a
+node can stamp the next one, so deployments build up from here.
 
 ## Install
 
