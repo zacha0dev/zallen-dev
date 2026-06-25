@@ -11,20 +11,20 @@ node can stamp the next one, so deployments build up from here.
 
 ## Install
 
-Paste this into an agentic CLI (Claude Code, Codex, Copilot, Gemini):
+**1.** Set up an Azure account and an agent CLI (Claude Code, Codex, Copilot, or
+Gemini). One-line installs and links: [Prereqs](install/prereqs.md).
+
+**2.** Paste this into your agent CLI:
 
 ```
 Install mcp-node: read and follow https://github.com/zacha0dev/zallen-dev/blob/main/mcp-node/install/agent.md
 ```
 
-That is the whole install. It installs any missing tools, logs you into Azure,
-asks a few questions, deploys, and prints your connect config.
+**3.** Answer the few questions it asks. It installs the rest, logs you into
+Azure, deploys, and prints your connect config.
 
-No agent CLI? Run `./scripts/deploy.sh` (or `scripts/deploy.ps1` on Windows)
-instead - it does the same thing.
-
-New to this? [Prereqs - do this first](install/prereqs.md) has the one-line
-installs for an agent CLI and Azure, with links.
+That is it. (No agent CLI? Run `./scripts/deploy.sh`, or `scripts/deploy.ps1` on
+Windows - it does the same thing.)
 
 ## What it does
 
