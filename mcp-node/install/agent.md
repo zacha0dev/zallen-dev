@@ -73,7 +73,9 @@ node and the installer Key Vault Secrets Officer (read + rotate) on the vault.
 
 Generate three random values (`openssl rand -hex 32`) and write them to the
 node's Key Vault as `oauth-client-id`, `oauth-client-secret`,
-`mcp-bearer-token`. Do not print them yet.
+`mcp-bearer-token`. Do not print them yet. The role assignment from step 3 can
+take a minute to propagate, so if `az keyvault secret set` returns Forbidden,
+wait ~10s and retry (up to a minute) before treating it as a real failure.
 
 ## 5. Deploy the server code
 
