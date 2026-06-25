@@ -44,7 +44,17 @@ ChatGPT wants every endpoint listed.
    - **Scopes:** `mcp`
 3. Save, then authorize.
 
-## Command-line clients (Claude Code, Codex)
+## Grok (custom MCP connector)
+
+Grok takes the same endpoints as ChatGPT:
+
+- **MCP server URL:** `https://<host>/mcp`
+- **Authorization URL:** `https://<host>/authorize`
+- **Token URL:** `https://<host>/token`
+- **Client ID** and **Client Secret:** from your connect block
+- **Scopes:** `mcp`
+
+## Command-line clients (Claude Code, Codex, GitHub Copilot CLI)
 
 These use the bearer directly - no OAuth dance.
 
