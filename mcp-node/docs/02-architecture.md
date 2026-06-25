@@ -1,3 +1,5 @@
+[mcp-node](../README.md) · [Docs](README.md) · [← Concepts](01-concepts.md) · [Auth →](03-auth.md)
+
 # Architecture and runtime
 
 This page traces what actually happens, from a client connecting to a tool
