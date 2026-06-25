@@ -109,6 +109,21 @@ resource kvRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   }
 }
 
+// The node manages its OWN resource group: Contributor scoped to THIS RG only.
+// Full control inside its box; zero rights anywhere else in the subscription.
+// (Deploying this assignment requires the installer to be Owner / User Access
+// Administrator on the RG, which the subscription owner running the install is.)
+var contributorRoleId = 'b24988ac-6180-42a0-bb6f-0d3e8c0e7c0e' // Contributor
+resource rgRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, func.id, contributorRoleId)
+  scope: resourceGroup()
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', contributorRoleId)
+    principalId: func.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
 // The cost cap: monthly budget on this resource group, alerts + forecast.
 resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
   name: '${nodeName}-monthly-cap'
