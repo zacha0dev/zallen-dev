@@ -48,3 +48,7 @@ reconnect, then the new tool is callable.
 
 This is the open part: build and explore as far as you want. The base set is
 just a starting point.
+
+For the full lifecycle - forking the repo so you own it, wiring the CI deploy,
+the update + debug loop, and adding a tool's API key + custom setup - see
+`operating.md`.
