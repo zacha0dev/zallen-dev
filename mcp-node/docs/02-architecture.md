@@ -1,38 +1,67 @@
-# Architecture
+# Architecture and runtime
 
-The components and how a request flows through them.
+This page traces what actually happens, from a client connecting to a tool
+running. Read [Concepts](01-concepts.md) first for the vocabulary.
 
-## Components (all in one resource group)
+## The components (one resource group)
 
-- **Function App** (Azure Functions, Consumption plan) - runs the Model Context
-  Protocol (MCP) server. Scale-to-zero, so about $0 when idle.
-- **Key Vault** - stores the Open Authorization (OAuth) client id/secret and the
-  bearer token.
-- **Managed identity** - attached to the Function App; how it authenticates to
-  Azure with no stored secret.
+- **Function App** (Consumption) - the Model Context Protocol (MCP) server.
+- **Key Vault** - the Open Authorization (OAuth) and bearer secrets.
+- **Managed identity** - the node's credential to Azure.
 - **Application Insights + Log Analytics** - logs and metrics.
-- **Budget** - the monthly cost cap with alerts.
+- **Budget** - the cost cap.
 
-## How a request flows
+## Step 1 - the client connects (OAuth)
 
-1. The artificial intelligence (AI) client connects and runs the OAuth flow
-   (`/authorize` then `/token`) to get a bearer token.
-2. For each action the AI sends a request to `/mcp` carrying that bearer.
-3. The server checks the bearer, finds the named tool, and runs its handler.
-4. The handler does the work - calling Azure through the managed identity, or
-   GitHub through a stored token, or reading the knowledge pack.
-5. The result returns to the AI as structured output.
+Before any tool call, the artificial intelligence (AI) client gets a bearer token
+through the OAuth flow (full detail in [Auth](03-auth.md)). End state: the client
+holds a bearer it will send on every request.
 
-(A boxed topology diagram is planned; for now this list is the flow.)
+## Step 2 - the handshake (initialize)
 
-## The two trust boundaries
+The client opens an MCP session against `/mcp` and sends `initialize`. The server
+(`functions/mcp.js`) checks the bearer, then replies with its protocol version
+and that it supports tools. A wrong bearer returns 401 here and the session never
+starts.
 
-- **Inbound:** a caller must hold the bearer. No bearer, no tool calls.
-- **Outbound:** the managed identity is scoped to the one resource group (RG), so
-  even a misbehaving tool cannot reach the rest of your subscription.
+## Step 3 - discovering tools (tools/list)
 
-Understanding these two boundaries is most of understanding the node's security;
-[Auth and identity](03-auth.md) goes deeper.
+The client sends `tools/list`. The server asks the tool registry
+(`tools/index.js`) for every tool's name, description, and input schema, and
+returns them. The model now has a menu of what it can do, in its context.
+
+## Step 4 - the model decides to call
+
+This part is the model, not the server. As you chat, the model weighs your
+request against the tool descriptions from step 3. When one fits, it emits a tool
+call - the tool name plus arguments it constructs to match the input schema.
+
+## Step 5 - the call runs (tools/call)
+
+The client sends `tools/call` with that name and arguments. The server
+(`functions/mcp.js`):
+
+1. re-checks the bearer,
+2. looks the tool up in the registry,
+3. runs its `handler(args)`,
+4. wraps the return value as the call result.
+
+## Step 6 - the handler does the work
+
+What it does depends on the tool:
+
+- an **azure** tool gets an Azure token from the managed identity and calls Azure
+  Resource Manager,
+- a **github** tool reads its token from Key Vault and calls the GitHub API,
+- a **self** tool reads local state or the knowledge pack.
+
+The result returns up the chain to the model, which uses it to answer you.
+
+## The two boundaries (why this is safe)
+
+- **Inbound:** every step past `initialize` requires the bearer.
+- **Outbound:** the managed identity is scoped to this one resource group (RG),
+  so a handler cannot reach anything else in your subscription.
 
 ## Where each part lives
 
@@ -43,5 +72,5 @@ Understanding these two boundaries is most of understanding the node's security;
 | OAuth endpoints | `src/functions/oauth.js` |
 | MCP endpoint | `src/functions/mcp.js` |
 | Secrets access | `src/lib/secrets.js` |
-| Tools | `src/tools/*.js` |
+| Tools + registry | `src/tools/*.js` |
 | Node knowledge | `src/kb/*.md` |
