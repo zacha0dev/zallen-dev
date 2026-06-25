@@ -56,3 +56,7 @@ Burstable Postgres tier; raise `monthlyCapUsd` deliberately if you scale up.
 ## Version
 
 v0.1 (foundation; agent images and ingest path are being built out)
+
+---
+
+[zallen.dev](https://zallen.dev/) · [github.com/zacha0dev](https://github.com/zacha0dev)
