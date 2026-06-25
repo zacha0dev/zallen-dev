@@ -22,10 +22,10 @@ uses the Open Authorization (OAuth) sign-in flow (full detail in
 
 ## Step 2 - the handshake (initialize)
 
-The client opens an MCP session against `/mcp` and sends `initialize`. The server
-(`functions/mcp.js`) checks the bearer, then replies with its protocol version
-and that it supports tools. A wrong bearer returns 401 here and the session never
-starts.
+The client opens a session against `/mcp` and says hello (`initialize`). The
+server (`functions/mcp.js`) checks the pass, then replies with what it is and
+that it has tools. A wrong or missing pass is rejected right here, and the
+session never starts.
 
 ## Step 3 - discovering tools (tools/list)
 
