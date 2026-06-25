@@ -1,4 +1,4 @@
-[mcp-node](../README.md) · [Docs](README.md) · [← Auth](03-auth.md) · [The tools →](05-tools.md)
+← [All docs](README.md)
 
 # The server
 
