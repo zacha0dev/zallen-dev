@@ -45,10 +45,9 @@ simple request/response format over HTTP.
    supports. This is the handshake.
 2. **Discover tools.** The client sends `tools/list`; the server returns every
    tool with its schema. Now the model knows what it can do.
-3. **The model decides.** As you chat, the model sees those tool descriptions.
-   When your request matches one ("what am I spending?"), it chooses to call that
-   tool and fills the arguments from the schema. This step is the model's
-   judgment, not the server's.
+3. **The model decides.** As you chat, the AI sees those tool descriptions. When
+   your request matches one ("what am I spending?"), it picks that tool and fills
+   in any details it needs. This choice is the AI's judgment, not the server's.
 4. **Call.** The client sends `tools/call` with the tool name and arguments.
 5. **Run and return.** The server runs the tool's handler and returns the result;
    the model reads it and answers you.
