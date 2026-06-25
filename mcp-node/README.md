@@ -72,12 +72,14 @@ each a fresh resource group with its own cost cap. Two ways:
 
 ## Extend it
 
-The node is yours to grow. Ask the connected AI to add a tool and it edits the
-Function App's tool modules through the node's own GitHub tools, then redeploys -
-the same loop that built it. Tools are small modules under `src/tools`; the
-process lives in the node's own context (`src/kb/extending.md`) so the AI can
-follow it when you prompt. Open by design - build and explore as far as you want;
-the base set is just the start.
+The node is yours to grow. Fork the repo so you own it, then ask the connected AI
+to add a tool - it edits the Function App's tool modules and a GitHub Action
+builds and pushes the update to your node. Same loop that built it: prompt, build,
+deploy, reconnect (with a debug round or two as needed). Tools are small modules
+under `src/tools`; the full lifecycle - fork, CI deploy, the update + debug loop,
+and adding a tool's API key + custom setup - lives in the node's own context
+(`src/kb/extending.md`, `src/kb/operating.md`) so the AI can follow it when you
+prompt. Open by design - the base set is just the start.
 
 ## Cost
 
