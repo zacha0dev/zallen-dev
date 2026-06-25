@@ -11,22 +11,17 @@ node can stamp the next one, so deployments build up from here.
 
 ## Install
 
-Two steps. You do not install Azure CLI / Node / Functions tools by hand - that
-happens automatically in step 2.
+Paste this into an agentic CLI (Claude Code, Codex, Copilot, Gemini):
 
-**1. Prereq** - have one of these (you probably already do):
-- an agent CLI: Claude Code, Codex, Copilot, or Gemini, or
-- bash or PowerShell (for the plain script).
+```
+Install mcp-node: read and follow https://github.com/zacha0dev/zallen-dev/blob/main/mcp-node/install/agent.md
+```
 
-**2. Run it:**
-- Agent - paste this one line:
-  ```
-  Install mcp-node: read and follow https://github.com/zacha0dev/zallen-dev/blob/main/mcp-node/install/agent.md
-  ```
-- Script - `./scripts/deploy.sh` (or `scripts/deploy.ps1` on Windows).
+That is the whole install. It installs any missing tools, logs you into Azure,
+asks a few questions, deploys, and prints your connect config.
 
-Either way it installs any missing tools, runs `az login`, asks only for what it
-needs, deploys, and prints your connect config.
+No agent CLI? Run `./scripts/deploy.sh` (or `scripts/deploy.ps1` on Windows)
+instead - it does the same thing.
 
 ## What it does
 
