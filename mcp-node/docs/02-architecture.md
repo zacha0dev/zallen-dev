@@ -1,4 +1,4 @@
-[mcp-node](../README.md) · [Docs](README.md) · [← Concepts](01-concepts.md) · [Auth →](03-auth.md)
+← [All docs](README.md)
 
 # Architecture and runtime
 
