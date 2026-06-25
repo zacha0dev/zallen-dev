@@ -1,4 +1,4 @@
-[mcp-node](../README.md) · [Docs](README.md) · [← Architecture](02-architecture.md) · [The server →](04-server.md)
+← [All docs](README.md)
 
 # Auth and identity
 
