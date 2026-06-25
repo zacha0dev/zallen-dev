@@ -76,13 +76,32 @@ An AI client (Claude, ChatGPT, any MCP client) connects over OAuth and can:
 - **Function App** (Consumption, scale-to-zero) - the MCP server. Serves the
   OAuth endpoints (`/authorize`, `/token`) and the MCP tool endpoint (`/mcp`).
 - **Tools**
-  - Azure: deploy, resource-group create, app settings, spend
-  - GitHub: read, commit, PR, dispatch deploy
-  - self: logs, status, knowledge (kb)
+  - Azure: resources, spend (via managed identity, scoped to this RG)
+  - GitHub: read, commit, dispatch deploy (so the node updates itself)
+  - self: node status, knowledge (kb)
 - **Key Vault** - OAuth client id/secret, bearer token, secrets.
 - **Managed Identity** - scoped to this resource group only.
 - **Cost guard** - per-RG monthly budget (default ~$10) with 50/80/100% +
-  forecast alerts and a throttle at 100%. App Insights for logs and metrics.
+  forecast alerts. App Insights for logs and metrics.
+
+## Layout
+
+```
+mcp-node/
+  infra/node.bicep        one resource group: Function App + KV + identity + budget
+  src/                    the MCP server (Azure Functions, Node 20)
+    index.js              entry point
+    host.json             routePrefix "" so /authorize /token /mcp serve directly
+    functions/oauth.js    /authorize + /token + discovery
+    functions/mcp.js      /mcp JSON-RPC endpoint (initialize, tools/list, tools/call)
+    lib/secrets.js        Key Vault access via managed identity
+    tools/                self, azure, github tool modules + registry
+    kb/                   baked-in knowledge pack (kb_search reads this)
+  install/one-shot.md     the install prompt, with the walkthrough
+  scripts/deploy.sh       deterministic installer (bash)
+  scripts/deploy.ps1      deterministic installer (PowerShell)
+  deploy/deploy.yml       self-deploy workflow template
+```
 
 ## Connect
 
@@ -93,9 +112,9 @@ An AI client (Claude, ChatGPT, any MCP client) connects over OAuth and can:
 
 ## Cost
 
-One resource group, one budget. Default ~$10/month, set via `amountUsd`. Alerts
-at 50/80/100% plus a forecast alert; a scheduled guard throttles the node at
-100%. Scale-to-zero means an idle node costs next to nothing.
+One resource group, one budget. Default ~$10/month, set via `monthlyCapUsd`.
+Alerts at 50/80/100% plus a forecast alert. Scale-to-zero means an idle node
+costs next to nothing.
 
 ## Version
 
