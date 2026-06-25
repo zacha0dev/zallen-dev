@@ -7,6 +7,9 @@ with AI, readable whether you write code or not.
 
 - **[mcp-node](mcp-node/)** - a single-tenant, self-managing MCP node (one Azure
   resource group, ~$10/month cap).
+- **[ai-stack](ai-stack/)** - the brains and agents stacked on mcp-node: RAG
+  (Postgres + pgvector), blob storage, and agents on Container Apps, in one
+  capped resource group.
 
 More to come.
 
