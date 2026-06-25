@@ -4,21 +4,6 @@
 
 ---
 
-## Why I am writing this
-
-Most AI you meet is a chat box. You type, it talks back. That is fine, but it is
-not the part that excites me, and I do not think it should be the part that
-excites you either.
-
-What gets me going is giving an AI hands, safely, and watching it do real work. So
-I built a small piece of cloud that an AI can stand up, run, fix, and extend by
-itself, inside a box it cannot escape and a budget it cannot blow. About $10 a
-month, capped. You deploy your own, point your assistant at it, and start poking.
-
-I am putting this out because I want other engineers to get their hands on it. Not
-the hype version of AI; the real, hands-on version, where you can deploy it, break
-it, cap it, and own it. If that is you, pull up a terminal.
-
 ## The short version
 
 It is one small node: a server your AI connects to, plus the tools for that AI to
