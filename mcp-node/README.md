@@ -30,12 +30,19 @@ needs, deploys, and prints your connect config.
 
 ## What it does
 
-An AI client (Claude, ChatGPT, any MCP client) connects over OAuth and can:
+It is an open box, not a fixed product. An AI client (Claude, ChatGPT, any MCP
+client) connects over OAuth and can:
 
-- deploy and update the node itself
-- read its own status and spend
-- manage its resource group (Azure) and its repo (GitHub)
-- stand up new nodes, each with its own cost cap
+- **deploy infra in one shot** - spin resources straight into your capped Azure
+  sandbox from a sentence (no template library; you describe it, it deploys it)
+- **add your own tools and 3rd-party connectors** - wrap an API as a tool and a
+  GitHub Action redeploys the node with it, the same way larger MCP toolsets are
+  built up; that is how the box grows on Azure
+- read its own status and spend, manage its resource group and its repo
+- update and redeploy itself, and stamp more capped nodes
+
+What it does on day one is the floor, not the ceiling - you expand it by using
+it.
 
 ## Architecture
 
