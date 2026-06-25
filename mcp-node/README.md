@@ -36,6 +36,17 @@ A connected AI (Claude, ChatGPT, any MCP client) can:
 
 Day one is the floor, not the ceiling.
 
+## Run it from anywhere (the unlock)
+
+Once it is set up, anything that speaks MCP can drive it:
+
+- **Command line:** Claude Code, Codex, GitHub Copilot CLI.
+- **Chat apps:** ChatGPT, and Claude (web or Claude Code web).
+
+Because the chat apps run in a browser, you can manage, deploy, and run your cloud
+from your phone. Standing up infrastructure from your couch, on mobile, is the
+unlock.
+
 ## Connect
 
 After install you get a connect block. Step-by-step per client (Claude / ChatGPT
