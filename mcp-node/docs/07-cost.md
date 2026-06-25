@@ -1,3 +1,5 @@
+[mcp-node](../README.md) · [Docs](README.md) · [← Infrastructure](06-infrastructure.md) · [Scaling →](08-scaling.md)
+
 # Cost
 
 What the node costs, and what keeps it bounded.
