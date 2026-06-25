@@ -1,9 +1,8 @@
-# zallen.dev - building with AI, hands-on
+# zallen-dev
 
 [zallen.dev](https://zallen.dev/) · [github.com/zacha0dev](https://github.com/zacha0dev)
 
-An engineering journal: short, follow-along explainers about building real things
-with AI, readable whether you write code or not.
+Projects and notes from building AI systems on Azure.
 
 ## Projects
 
