@@ -13,9 +13,9 @@ the one creating each RG.
 
 ## Opt-in: let the node stamp siblings
 
-Run `scripts/enable-scaling.sh` once. It grants the node's managed identity
-Contributor at subscription scope. After that the connected AI can, from inside
-the connector:
+Run `scripts/enable-scaling.sh` once. It gives the node permission over your whole
+subscription (not just its own box) - "Contributor at subscription scope" in
+Azure terms. After that the connected AI can, from inside the connector:
 
 - `azure_rg_create` - create a new RG,
 - `azure_budget_set` - put a cap on it,
