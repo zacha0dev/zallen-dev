@@ -1,51 +1,96 @@
 # Auth and identity
 
-Two separate mechanisms. Keeping them straight is the key to the node's security.
+Two mechanisms: how a client proves it may talk to the node (Open Authorization,
+inbound), and how the node proves it may touch Azure (managed identity,
+outbound).
 
-## Inbound: OAuth (client to node)
+## Inbound: OAuth, explained
 
-The client authenticates to the node with Open Authorization (OAuth) 2.0, the
-authorization-code flow:
+### Why OAuth at all
 
-1. The client opens `/authorize?client_id=...&redirect_uri=...`. The node checks
-   the client id against the `oauth-client-id` secret and returns a short-lived,
-   single-use code.
-2. The client posts that code plus client id and client secret to `/token`. The
-   node checks both secrets and returns the bearer token (`mcp-bearer-token`).
-3. The client sends that bearer on every `/mcp` call.
+The node's tools can spend money and change infrastructure, so not just anyone
+may call them. OAuth 2.0 is the standard way for a client to obtain a token that
+proves it is allowed in - without the node handing out anything permanent up
+front.
 
-A discovery endpoint (`/.well-known/oauth-authorization-server`) lets clients
-auto-configure the URLs.
+### The pieces
 
-What each client needs:
+- **Client ID** - public identifier for the connecting app. Secret name:
+  `oauth-client-id`.
+- **Client Secret** - the private half; proves the app is genuine. Secret name:
+  `oauth-client-secret`.
+- **Authorization code** - a short-lived, single-use code the node hands back
+  mid-flow.
+- **Bearer token** - the actual key the client sends on every tool call. Secret
+  name: `mcp-bearer-token`.
 
-- **Claude** - client id + client secret (it runs the flow itself).
-- **ChatGPT** - the full set: server URL, authorize URL, token URL, id, secret,
-  scopes.
-- **A command-line client** - the bearer directly.
+### The flow, step by step
+
+1. The client opens the **authorize URL**:
+   `https://<host>/authorize?client_id=<id>&redirect_uri=<callback>&state=<x>`.
+2. The node checks `client_id` against `oauth-client-id`, mints an authorization
+   code, and redirects the browser back to the client's **redirect_uri
+   (callback)** with `?code=...`.
+3. The client posts to the **token URL** `https://<host>/token` with the code +
+   client id + client secret.
+4. The node checks both secrets and returns the **bearer token**.
+5. The client sends `Authorization: Bearer <token>` on every `/mcp` call. The
+   node compares it to `mcp-bearer-token` and runs the tool.
+
+### The URLs a connector asks for
+
+- **Authorize:** `https://<host>/authorize`
+- **Token:** `https://<host>/token`
+- **MCP endpoint:** `https://<host>/mcp`
+- **Discovery:** `https://<host>/.well-known/oauth-authorization-server`
+- **Redirect / callback:** the client supplies its own (claude.ai and ChatGPT
+  pass their callback automatically); the node accepts what the client sends.
+
+`<host>` is your Function App host, printed at install (and the `mcpUrl` output).
+
+### Getting your secrets (Key Vault commands)
+
+The install stored three secrets in your node's Key Vault. Read them back for a
+connector setup:
+
+```
+az keyvault secret show --vault-name <node-kv> --name oauth-client-id     --query value -o tsv
+az keyvault secret show --vault-name <node-kv> --name oauth-client-secret --query value -o tsv
+az keyvault secret show --vault-name <node-kv> --name mcp-bearer-token    --query value -o tsv
+```
+
+See what is set (names only, no values):
+
+```
+az keyvault secret list --vault-name <node-kv> -o table
+```
+
+Rotate one (the node picks up the change within about a minute):
+
+```
+az keyvault secret set --vault-name <node-kv> --name mcp-bearer-token --value "$(openssl rand -hex 32)"
+```
+
+(`<node-kv>` is your node's Key Vault name, the `keyVaultName` deploy output.)
 
 ## Outbound: managed identity (node to Azure)
 
 The Function App has a system-assigned managed identity. Azure issues and rotates
-its credential automatically; nothing is stored in the repo or app settings.
-Code gets a token through `DefaultAzureCredential` and calls Azure.
+its credential automatically; nothing is stored in the repo or app settings. Code
+gets a token through `DefaultAzureCredential` and calls Azure.
 
-This is better than a service principal (SP): there is no client secret to leak
-or rotate, and the credential cannot be copied off the machine.
+Better than a service principal (SP): no client secret to leak or rotate, and the
+credential cannot be copied off the machine.
 
 ## The RBAC detail that bites people
 
 The Key Vault runs in role-based access control (RBAC) mode. On an RBAC vault,
-being subscription Owner does NOT let you read or write secrets - secret access
-is a separate data-plane role. So the deploy explicitly grants:
-
-- the node's identity - Key Vault Secrets Officer (read and rotate its own OAuth
-  secrets),
-- the installer - Key Vault Secrets Officer (so the first secret write succeeds).
-
-Without that grant, `az keyvault secret set` returns "Forbidden" even for an
-Owner. It is the most common Key Vault setup mistake; the node closes it for you
-by passing your object id into the deploy.
+being subscription Owner does NOT let you read or write secrets - that is a
+separate data-plane role. So the deploy explicitly grants Key Vault Secrets
+Officer to both the node's identity (read + rotate its OAuth secrets) and the
+installer (so the first secret write succeeds). Without it, `az keyvault secret
+set` returns "Forbidden" even for an Owner. The node closes this by passing your
+object id into the deploy.
 
 ## Scope
 
