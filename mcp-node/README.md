@@ -60,3 +60,7 @@ infrastructure, cost, scaling, extending.
 ## Version
 
 v1.0
+
+---
+
+[zallen.dev](https://zallen.dev/) · [github.com/zacha0dev](https://github.com/zacha0dev)
