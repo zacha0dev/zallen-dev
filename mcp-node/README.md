@@ -1,18 +1,13 @@
 # mcp-node
 
-An open, single-tenant MCP node: stand one up and let an AI explore and deploy
-freely in your own Azure, safely. It is one resource group running an MCP server
-the AI connects to, with the tools for it to operate that group's cloud and
-code. Scoped to the one group, capped at about $10/month, scaled to zero when
-idle - so "explore freely" can't run away or touch anything else.
-
-It is also the base things stack on: each node is the same foundation, and a
-node can stamp the next one, so deployments build up from here.
+An open, single-tenant MCP node. Stand one up and let an AI deploy and explore
+freely in your own Azure - one resource group, capped at ~$10/month, scaled to
+zero when idle. Each node is the same base, and a node can stamp the next.
 
 ## Install
 
-**1.** Set up an Azure account and an agent CLI (Claude Code, Codex, Copilot, or
-Gemini). One-line installs and links: [Prereqs](install/prereqs.md).
+**1.** Get an Azure account and an agent CLI (Claude Code, Codex, Copilot,
+Gemini): [Prereqs](install/prereqs.md).
 
 **2.** Paste this into your agent CLI:
 
@@ -20,79 +15,53 @@ Gemini). One-line installs and links: [Prereqs](install/prereqs.md).
 Install mcp-node: read and follow https://github.com/zacha0dev/zallen-dev/blob/main/mcp-node/install/agent.md
 ```
 
-**3.** Answer the few questions it asks. It installs the rest, logs you into
-Azure, deploys, and prints your connect config.
+**3.** Answer the few questions. It installs the rest, logs into Azure, deploys,
+and prints your connect config.
 
-That is it. (No agent CLI? Run `./scripts/deploy.sh`, or `scripts/deploy.ps1` on
-Windows - it does the same thing.)
+No agent CLI? Run `scripts/deploy.sh` (or `scripts/deploy.ps1`) instead.
 
 ## What it does
 
-It is an open box, not a fixed product. An AI client (Claude, ChatGPT, any MCP
-client) connects over OAuth and can:
+An open box, not a fixed product. A connected AI can:
 
-- **deploy infra in one shot** - "deploy a small VM" and it does, straight into
-  your capped Azure sandbox. No template library; you describe it, it deploys it,
-  following a clean naming + tagging convention so the group stays human-readable
-  and easy to tear down (`src/kb/infra.md`)
-- **add your own tools and 3rd-party connectors** - wrap an API as a tool and a
-  GitHub Action redeploys the node with it, the same way larger MCP toolsets are
-  built up; that is how the box grows on Azure
-- read its own status and spend, manage its resource group and its repo
-- update and redeploy itself, and stamp more capped nodes
+- **deploy infra in one shot** - "deploy a small VM" and it does, cleanly named
+  and tagged (`src/kb/infra.md`)
+- **add its own tools / 3rd-party connectors** - wrap an API as a tool; a GitHub
+  Action redeploys the node with it
+- read its status and spend, manage its resource group and repo
+- update itself, and stamp more capped nodes
 
-What it does on day one is the floor, not the ceiling - you expand it by using
-it.
+Day one is the floor; you expand it by using it.
 
 ## Architecture
 
-- **Function App** (Consumption, scale-to-zero) - the MCP server. Serves the
-  OAuth endpoints (`/authorize`, `/token`) and the MCP tool endpoint (`/mcp`).
-- **Tools**
-  - Azure: resources, spend (via managed identity, scoped to this RG)
-  - GitHub: read, commit, dispatch deploy (so the node updates itself)
-  - self: node status, knowledge (kb)
-- **Key Vault** - OAuth client id/secret, bearer token, secrets.
-- **Managed Identity** - scoped to this resource group only.
-- **Cost guard** - per-RG monthly budget (default ~$10) with 50/80/100% +
-  forecast alerts. App Insights for logs and metrics.
+- **Function App** (Consumption, scale-to-zero) - the MCP server: `/authorize`,
+  `/token`, `/mcp`.
+- **Tools** - azure (resources, spend), github (read, commit, deploy), self
+  (status, kb), scale (create + cap + deploy other RGs).
+- **Key Vault** - OAuth + bearer secrets. **Managed identity** scoped to this RG.
+- **Cost guard** - per-RG budget (~$10) with alerts + forecast.
 
 ## Connect
 
-- **Claude** (claude.ai connector): OAuth client id + client secret.
-- **ChatGPT** (custom MCP connector): server URL, authorize URL, token URL,
-  client id, client secret, scopes.
-- **CLI** (Claude Code / Codex): MCP URL + bearer token.
+- **Claude**: OAuth client id + secret.
+- **ChatGPT**: server URL + authorize + token + id + secret + scopes.
+- **CLI**: MCP URL + bearer.
 
 ## Scaling
 
-Start with one node. As you take on more projects, the node can stamp more -
-each a fresh resource group with its own cost cap. Two ways:
-
-- **Default (safe):** run the install again with a new node name. Each node is
-  isolated in its own RG; the node's rights stay scoped to its own box.
-- **Self-replicating (opt-in):** run `scripts/enable-scaling.sh` once to grant
-  the node's identity subscription-scope rights. Then the connected AI can do it
-  from inside the connector via `azure_rg_create`, `azure_budget_set`, and
-  `azure_deploy_template` - create a capped RG and deploy a sibling node into it.
-  Off until you run it; revoke any time with the command the script prints.
+Start with one node. For another, either re-run the install (new name, own RG),
+or run `scripts/enable-scaling.sh` once to let the node stamp siblings itself.
 
 ## Extend it
 
-The node is yours to grow. Fork the repo so you own it, then ask the connected AI
-to add a tool - it edits the Function App's tool modules and a GitHub Action
-builds and pushes the update to your node. Same loop that built it: prompt, build,
-deploy, reconnect (with a debug round or two as needed). Tools are small modules
-under `src/tools`; the full lifecycle - fork, CI deploy, the update + debug loop,
-and adding a tool's API key + custom setup - lives in the node's own context
-(`src/kb/extending.md`, `src/kb/operating.md`) so the AI can follow it when you
-prompt. Open by design - the base set is just the start.
+Fork the repo, then ask the AI to add a tool - it edits `src/tools` and a GitHub
+Action redeploys. Full loop in `src/kb/extending.md` and `src/kb/operating.md`.
 
 ## Cost
 
-One resource group, one budget. Default ~$10/month, set via `monthlyCapUsd`.
-Alerts at 50/80/100% plus a forecast alert. Scale-to-zero means an idle node
-costs next to nothing.
+One RG, one budget. ~$10/month by default (`monthlyCapUsd`), alerts at
+50/80/100%. Idle costs next to nothing.
 
 ## Version
 
