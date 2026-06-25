@@ -1,3 +1,5 @@
+[mcp-node](../README.md) · [Docs](README.md) · [Architecture →](02-architecture.md)
+
 # Concepts: what the Model Context Protocol is
 
 Start here. This page explains the protocol and the model behind the node before
