@@ -1,3 +1,5 @@
+[mcp-node](../README.md) · [Docs](README.md) · [← Scaling](08-scaling.md)
+
 # Extending: 3rd-party connectors and your own tools
 
 This is the point of the open box: wrap any application programming interface
