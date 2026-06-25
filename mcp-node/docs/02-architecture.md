@@ -53,10 +53,10 @@ The client sends `tools/call` with that name and arguments. The server
 
 What it does depends on the tool:
 
-- an **azure** tool gets an Azure token from the managed identity and calls Azure
-  Resource Manager,
-- a **github** tool reads its token from Key Vault and calls the GitHub API,
-- a **self** tool reads local state or the knowledge pack.
+- an **azure** tool uses the node's built-in Azure credential (its managed
+  identity) to ask Azure to do something,
+- a **github** tool reads its access token from the vault and calls GitHub,
+- a **self** tool reads the node's own status or its knowledge pack.
 
 The result returns up the chain to the model, which uses it to answer you.
 
