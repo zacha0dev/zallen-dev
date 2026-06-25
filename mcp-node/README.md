@@ -1,76 +1,50 @@
-# An AI that runs its own cloud
+# mcp-node
 
-*A hands-on explainer of the self-managing MCP node.*
+A single-tenant, self-managing MCP node: one Azure resource group running an MCP
+server an AI connects to, with the tools for that AI to operate the node's own
+cloud and code. Scoped to one resource group, capped at about $10/month, scaled
+to zero when idle.
 
----
+## What it does
 
-## The short version
+An AI client (Claude, ChatGPT, any MCP client) connects over OAuth and can:
 
-It is one small node: a server your AI connects to, plus the tools for that AI to
-run its own cloud and its own code. Capped at about $10 a month, scaled to zero
-when idle, locked to a sandbox it cannot leave.
+- deploy and update the node itself
+- read its own logs and status
+- manage its resource group (Azure) and its repo (GitHub)
+- stand up new nodes, each with its own cost cap
 
-Not a demo you watch. One you hold.
+## Architecture
 
-## What is MCP (30 seconds)
+- **Function App** (Consumption, scale-to-zero) - the MCP server. Serves the
+  OAuth endpoints (`/authorize`, `/token`) and the MCP tool endpoint (`/mcp`).
+- **Tools**
+  - Azure: deploy, resource-group create, app settings, spend
+  - GitHub: read, commit, PR, dispatch deploy
+  - self: logs, status, knowledge (kb)
+- **Key Vault** - OAuth client id/secret, bearer token, secrets.
+- **Managed Identity** - scoped to this resource group only.
+- **Cost guard** - per-RG monthly budget (default ~$10) with 50/80/100% + forecast
+  alerts and a throttle at 100%. App Insights for logs and metrics.
 
-MCP is a standard way to hand an AI a set of tools. Your assistant (Claude,
-ChatGPT, anything that speaks it) connects to your server and can use those tools.
+## Deploy
 
-That is the whole trick. What matters is *which tools* you put behind it. Put the
-right ones there and the AI stops being something you ask, and becomes something
-you work with.
+1. Run the setup script: provisions the resource group, the Function App, the Key
+   Vault, the managed identity, and the budget cap.
+2. Connect your AI client (see Connect).
 
-## The idea
+## Connect
 
-One cloud resource group; call it a node. Inside it: a small MCP server, its own
-keys, and tools that let the AI manage its own cloud and its own code.
+- **Claude** (claude.ai connector): OAuth client id + client secret.
+- **ChatGPT** (custom MCP connector): server URL, authorize URL, token URL, client
+  id, client secret, scopes.
 
-So the AI can deploy and update itself, read its own logs, and even spin up new
-nodes, each with its own cap. The thing it lives in is the same thing it controls.
-Ask it to add a feature, and it edits its code, ships it, then uses what it just
-built.
+## Cost
 
-## What it is made of
-
-A Function App is the MCP server: it holds the OAuth endpoints and the tool
-endpoint the AI calls. A Key Vault holds its keys. A Managed Identity scopes it to
-its one resource group so it cannot wander. A cost guard caps and throttles spend
-and ships the logs. The AI connects in by OAuth, then reaches back out through the
-Azure and GitHub tools to run, rebuild, and extend itself.
-
-## Follow along
-
-1. **Stand up a node.** One script creates the resource group, the server, the
-   keys, and the budget cap.
-2. **Connect your assistant.** The script prints what to paste. Claude needs an
-   id and secret; ChatGPT needs the full endpoint set.
-3. **Explore.** Ask what it can do. Ask it to read its logs. Ask it to add a tool
-   and ship it. Ask it to spin up a second, separately-capped node.
-
-The first time it edits its own code, deploys, and then uses the thing it just
-built, it stops feeling abstract.
-
-## Why it is safe to hand it the keys
-
-- **One node, one resource group.** Its access stops there. It cannot wander.
-- **A hard cap.** About $10 a month by default, with alerts and an automatic
-  throttle at the ceiling. Want more room? Change one number.
-- **Scale-to-zero.** Idle costs next to nothing.
-- **Your keys.** You connect to *your* node. Nothing is shared with a third party.
-
-## Why it matters
-
-- **The model is the easy part.** The value is the tools, the limits, the wiring.
-- **The limits are the feature.** Caps and boundaries are what make letting an AI
-  act trustworthy instead of reckless.
-- **AI as an operator, not an oracle.** The question stops being "what will it
-  say?" and becomes "what will it do, and how do I shape that?"
+One resource group, one budget. Default ~$10/month, set via `amountUsd`. Alerts at
+50/80/100% plus a forecast alert; a scheduled guard throttles the node at 100%.
+Scale-to-zero means an idle node costs next to nothing.
 
 ## Version
 
-**v1.0** - deploys, self-manages, caps its own spend, and connects Claude or ChatGPT.
-
----
-
-*From [zallen.dev](https://zallen.dev): building with AI, hands-on.*
+v1.0
