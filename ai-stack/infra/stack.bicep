@@ -1,8 +1,8 @@
 // stack.bicep - ai-stack (Project 2), deployed into ONE resource group on top of
-// a running mcp-node. Creates the RAG data plane (Postgres + pgvector, blob) and
-// the agent plane (Azure Container Apps), plus Key Vault, a scoped managed
-// identity, App Insights, and a monthly budget cap. Kept deliberately cheap:
-// smallest Burstable Postgres, container apps scale to zero.
+// a running mcp-node. Creates the RAG data plane (Postgres + pgvector, blob, the
+// RAG search service) and the agent plane (Azure Container Apps), plus Key Vault,
+// a scoped managed identity, App Insights, and a monthly budget cap. Kept
+// deliberately cheap: smallest Burstable Postgres, container apps scale to zero.
 targetScope = 'resourceGroup'
 
 @description('Azure region.')
@@ -36,8 +36,19 @@ param pgAdminLogin string = 'pgadmin'
 @secure()
 param pgAdminPassword string
 
+@description('Bearer token protecting the RAG service HTTP surface. Generate at install and store in Key Vault.')
+@secure()
+param ragBearerToken string
+
 @description('Container image for the agents. Defaults to a placeholder until the real agent image is published.')
 param agentImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+
+@description('Container image for the RAG search service. Defaults to a placeholder until the real image is published.')
+param ragImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+
+@description('Embedding provider for the RAG plane: openai | azure | cohere. The matching API key must be seeded into Key Vault before ingest/search work.')
+@allowed([ 'openai', 'azure', 'cohere' ])
+param embeddingProvider string = 'openai'
 
 @description('The mcp-node MCP URL this stack registers with (Project 1 control plane).')
 param mcpNodeUrl string = ''
@@ -130,6 +141,13 @@ resource pgSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   name: 'pg-admin-password'
   properties: { value: pgAdminPassword }
 }
+// Bearer token for the RAG service HTTP surface; the node's rag_search tool
+// reads the same value from its own vault to call the service.
+resource ragTokenSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: kv
+  name: 'rag-bearer-token'
+  properties: { value: ragBearerToken }
+}
 resource kvInstaller 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(kv.id, installerObjectId, kvSecretsOfficerRoleId)
   scope: kv
@@ -166,6 +184,33 @@ var agentEnv = [
   { name: 'MCP_NODE_URL', value: mcpNodeUrl }
   { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: appInsights.properties.ConnectionString }
 ]
+
+// RAG search service - the data-plane HTTP surface (/rag/ingest, /rag/search).
+// External ingress so the mcp-node's rag_search tool can reach it; it is bearer-
+// protected (rag-bearer-token) at the app layer.
+resource ragApp 'Microsoft.App/containerApps@2024-03-01' = {
+  name: '${stackName}-rag'
+  location: location
+  identity: { type: 'SystemAssigned' }
+  properties: {
+    managedEnvironmentId: cae.id
+    configuration: { ingress: { external: true, targetPort: 8080 } }
+    template: {
+      containers: [
+        {
+          name: 'rag'
+          image: ragImage
+          resources: { cpu: json('0.25'), memory: '0.5Gi' }
+          env: concat(agentEnv, [
+            { name: 'EMBEDDING_PROVIDER', value: embeddingProvider }
+            { name: 'PORT', value: '8080' }
+          ])
+        }
+      ]
+      scale: { minReplicas: 0, maxReplicas: 2 }
+    }
+  }
+}
 
 // System app - the trainer + manager/orchestrator agent.
 resource systemApp 'Microsoft.App/containerApps@2024-03-01' = {
@@ -211,7 +256,17 @@ resource agentsApp 'Microsoft.App/containerApps@2024-03-01' = {
   }
 }
 
-// Both apps may read secrets from the vault.
+// All three apps may read secrets from the vault (PG password, embedding key,
+// RAG bearer token).
+resource kvRag 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(kv.id, ragApp.id, kvSecretsUserRoleId)
+  scope: kv
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', kvSecretsUserRoleId)
+    principalId: ragApp.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
 resource kvSystem 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(kv.id, systemApp.id, kvSecretsUserRoleId)
   scope: kv
@@ -250,6 +305,7 @@ resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
 
 output postgresHost string = pg.properties.fullyQualifiedDomainName
 output ragDatabase string = 'rag'
+output ragServiceUrl string = 'https://${ragApp.properties.configuration.ingress.fqdn}'
 output storageAccount string = sa.name
 output keyVaultName string = kv.name
 output systemAppName string = systemApp.name
