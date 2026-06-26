@@ -66,6 +66,17 @@ app.http("token", {
   authLevel: "anonymous",
   route: "token",
   handler: async (request, context) => {
+    // Per-IP failed-auth throttle so /token isn't a free client-secret oracle.
+    const ip = clientIp(request);
+    const retryAfter = authThrottleRetryAfter(ip);
+    if (retryAfter > 0) {
+      return {
+        status: 429,
+        headers: { "Retry-After": String(retryAfter) },
+        jsonBody: { error: "slow_down" },
+      };
+    }
+
     const body = await request.text();
     const form = new URLSearchParams(body);
     const clientId = form.get("client_id");
@@ -78,9 +89,15 @@ app.http("token", {
       getSecret("mcp-bearer-token"),
     ]);
 
-    if (clientId !== expectedId || clientSecret !== expectedSecret) {
+    // Evaluate BOTH compares (no || short-circuit) before AND-ing, so neither
+    // the result nor the timing reveals which of id/secret was wrong.
+    const idOk = timingSafeEqual(clientId || "", expectedId);
+    const secretOk = timingSafeEqual(clientSecret || "", expectedSecret);
+    if (!(idOk && secretOk)) {
+      recordAuthFailure(ip);
       return { status: 401, jsonBody: { error: "invalid_client" } };
     }
+    recordAuthSuccess(ip);
 
     const entry = code && codes.get(code);
     if (!entry || Date.now() - entry.at > CODE_TTL_MS) {
