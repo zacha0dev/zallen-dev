@@ -65,7 +65,8 @@ Write-Host "==> Seeding OAuth secrets into $KvName"
 # which is not suitable for secrets. nHexChars must be even (1 byte = 2 hex).
 function New-SecretHex($nHexChars) {
   $bytes = New-Object byte[] ($nHexChars / 2)
-  [System.Security.Cryptography.RandomNumberGenerator]::Fill($bytes)
+  $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+  try { $rng.GetBytes($bytes) } finally { $rng.Dispose() }
   -join ($bytes | ForEach-Object { "{0:x2}" -f $_ })
 }
 $ClientId     = New-SecretHex 32
