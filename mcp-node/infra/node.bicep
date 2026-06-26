@@ -25,6 +25,9 @@ param alertEmail string
 @description('Daily Log Analytics ingestion cap (GB) - cost knob.')
 param logDailyQuotaGb int = 1
 
+@description('The repo this node deploys from (owner/name). Surfaced as the NODE_REPO app setting; the GitHub tools refuse any repo other than this one (confused-deputy guard). Leave empty to keep the GitHub tools disabled.')
+param nodeRepo string = ''
+
 @description('Object id of the principal running this deploy: az ad signed-in-user show --query id -o tsv. Granted Key Vault Secrets Officer so it can seed/rotate the OAuth secrets. On an RBAC vault, subscription Owner alone does NOT grant data-plane secret access - this is the reader-role wall.')
 param installerObjectId string
 
