@@ -3,8 +3,8 @@
 # mcp-node
 
 An open, single-tenant MCP node: stand one up and let an AI deploy and explore
-freely in your own Azure, safely. One resource group, capped at ~$10/month,
-scaled to zero when idle. Each node is the same base, and a node can stamp the
+freely in your own Azure, safely. One resource group, alerted at ~$10/month
+(an Azure budget alert, not a hard cap), scaled to zero when idle. Each node is the same base, and a node can stamp the
 next.
 
 ## Install
