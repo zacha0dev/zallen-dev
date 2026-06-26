@@ -24,11 +24,13 @@ function getClient() {
 }
 
 async function getSecret(name) {
-  const hit = cache.get(name);
   const now = Date.now();
-  if (hit && now - hit.at < TTL_MS) return hit.value;
+  if (!NO_CACHE.has(name)) {
+    const hit = cache.get(name);
+    if (hit && now - hit.at < TTL_MS) return hit.value;
+  }
   const secret = await getClient().getSecret(name);
-  cache.set(name, { value: secret.value, at: now });
+  if (!NO_CACHE.has(name)) cache.set(name, { value: secret.value, at: now });
   return secret.value;
 }
 
