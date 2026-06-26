@@ -4,10 +4,25 @@
 // OAuth flow in oauth.js. On initialize the server also hands the client the
 // node's custom instructions (src/instructions.md).
 const { app } = require("@azure/functions");
+const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const { getSecret } = require("../lib/secrets");
+const { clientIp, authThrottleRetryAfter, recordAuthFailure, recordAuthSuccess } = require("../lib/throttle");
 const registry = require("../tools");
+
+// Constant-time string compare so a bearer check can't be timing-attacked.
+// Mirrors timingSafeStringEqual in the i2-ops reference (auth.ts): a length
+// mismatch still runs a constant-time compare to avoid leaking length.
+function timingSafeEqual(a, b) {
+  const aBuf = Buffer.from(String(a), "utf8");
+  const bBuf = Buffer.from(String(b), "utf8");
+  if (aBuf.length !== bBuf.length) {
+    crypto.timingSafeEqual(aBuf, aBuf);
+    return false;
+  }
+  return crypto.timingSafeEqual(aBuf, bBuf);
+}
 
 const PROTOCOL_VERSION = "2024-11-05";
 
