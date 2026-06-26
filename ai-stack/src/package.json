@@ -1,0 +1,18 @@
+{
+  "name": "ai-stack-rag",
+  "version": "0.1.0",
+  "description": "ai-stack RAG data plane: hybrid (vector + keyword) search over pgvector, on Azure Container Apps.",
+  "main": "server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@azure/identity": "^4.4.0",
+    "@azure/keyvault-secrets": "^4.8.0",
+    "pg": "^8.12.0"
+  }
+}
