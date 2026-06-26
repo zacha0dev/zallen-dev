@@ -54,7 +54,7 @@ async function authorized(request) {
   const bearer = header.replace(/^Bearer\s+/i, "");
   if (!bearer) return false;
   const expected = await getSecret("mcp-bearer-token");
-  return bearer === expected;
+  return timingSafeEqual(bearer, expected);
 }
 
 app.http("mcp", {
