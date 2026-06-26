@@ -4,8 +4,9 @@ const self = require("./self");
 const azure = require("./azure");
 const github = require("./github");
 const scale = require("./scale");
+const rag = require("./rag");
 
-const all = [...self.tools, ...azure.tools, ...github.tools, ...scale.tools];
+const all = [...self.tools, ...azure.tools, ...github.tools, ...scale.tools, ...rag.tools];
 const byName = new Map(all.map((t) => [t.name, t]));
 
 // The MCP tools/list shape: name, description, inputSchema (no handler).
