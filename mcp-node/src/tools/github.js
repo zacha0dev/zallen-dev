@@ -94,6 +94,7 @@ const putFile = {
     required: ["repo", "path", "content", "message"],
   },
   handler: async ({ repo, path, content, message, branch, sha }) => {
+    assertRepoAllowed(repo);
     const body = {
       message,
       content: Buffer.from(content, "utf8").toString("base64"),
