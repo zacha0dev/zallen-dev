@@ -122,6 +122,7 @@ const dispatch = {
     required: ["repo", "workflow"],
   },
   handler: async ({ repo, workflow, ref }) => {
+    assertRepoAllowed(repo);
     await gh(`/repos/${repo}/actions/workflows/${workflow}/dispatches`, {
       method: "POST",
       body: JSON.stringify({ ref: ref || "main" }),
