@@ -137,7 +137,7 @@ resource kvInstallerRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = 
 // Full control inside its box; zero rights anywhere else in the subscription.
 // (Deploying this assignment requires the installer to be Owner / User Access
 // Administrator on the RG, which the subscription owner running the install is.)
-var contributorRoleId = 'b24988ac-6180-42a0-bb6f-0d3e8c0e7c0e' // Contributor
+var contributorRoleId = 'b24988ac-6180-42a0-bb6f-d3e8c08e7c0e' // Contributor
 resource rgRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(resourceGroup().id, func.id, contributorRoleId)
   scope: resourceGroup()
