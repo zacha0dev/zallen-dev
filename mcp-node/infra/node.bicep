@@ -37,7 +37,7 @@ var saName = toLower('${nodeName}${suffix}')
 var kvName = '${nodeName}-kv-${suffix}'
 var funcName = '${nodeName}-func-${suffix}'
 var planName = '${nodeName}-plan-${suffix}'
-var kvSecretsOfficerRoleId = 'b86a8fe4-44ce-4948-aa7b-9d8c4f9b8e4a' // Key Vault Secrets Officer (read + write/rotate)
+var kvSecretsOfficerRoleId = 'b86a8fe4-44ce-4948-aa7b-9d8c44cf7174' // Key Vault Secrets Officer (read + write/rotate)
 
 resource law 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   name: '${nodeName}-law-${suffix}'
