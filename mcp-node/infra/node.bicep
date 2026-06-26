@@ -92,6 +92,7 @@ resource func 'Microsoft.Web/sites@2023-12-01' = {
         { name: 'KEY_VAULT_URL', value: kv.properties.vaultUri }
         { name: 'AZURE_SUBSCRIPTION_ID', value: subscription().subscriptionId }
         { name: 'AZURE_RESOURCE_GROUP', value: resourceGroup().name }
+        { name: 'NODE_REPO', value: nodeRepo }
       ]
     }
   }
