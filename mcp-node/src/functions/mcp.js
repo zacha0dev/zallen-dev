@@ -67,9 +67,24 @@ app.http("mcp", {
       return { status: 200, jsonBody: { name: "mcp-node", version: "1.0", protocol: PROTOCOL_VERSION } };
     }
 
+    // Per-IP failed-auth throttle: park an IP that keeps sending bad bearers
+    // so a warm instance isn't a free brute-force target. A valid bearer
+    // clears the IP, so legitimate callers are never throttled.
+    const ip = clientIp(request);
+    const retryAfter = authThrottleRetryAfter(ip);
+    if (retryAfter > 0) {
+      return {
+        status: 429,
+        headers: { "Retry-After": String(retryAfter) },
+        jsonBody: rpcError(null, -32002, "too many failed auth attempts; slow down"),
+      };
+    }
+
     if (!(await authorized(request))) {
+      recordAuthFailure(ip);
       return { status: 401, jsonBody: rpcError(null, -32001, "unauthorized") };
     }
+    recordAuthSuccess(ip);
 
     let msg;
     try {
