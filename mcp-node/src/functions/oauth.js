@@ -7,6 +7,19 @@
 const { app } = require("@azure/functions");
 const crypto = require("crypto");
 const { getSecret } = require("../lib/secrets");
+const { clientIp, authThrottleRetryAfter, recordAuthFailure, recordAuthSuccess } = require("../lib/throttle");
+
+// Constant-time string compare (mirrors auth.ts timingSafeStringEqual): a length
+// mismatch still runs a constant-time compare so length isn't leaked by timing.
+function timingSafeEqual(a, b) {
+  const aBuf = Buffer.from(String(a), "utf8");
+  const bBuf = Buffer.from(String(b), "utf8");
+  if (aBuf.length !== bBuf.length) {
+    crypto.timingSafeEqual(aBuf, aBuf);
+    return false;
+  }
+  return crypto.timingSafeEqual(aBuf, bBuf);
+}
 
 // Short-lived auth codes. Single-tenant scale-to-zero node, so in-memory is
 // acceptable; codes expire in 10 minutes and are single-use.
