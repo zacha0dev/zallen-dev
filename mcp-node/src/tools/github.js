@@ -67,6 +67,7 @@ const getFile = {
     required: ["repo", "path"],
   },
   handler: async ({ repo, path, ref }) => {
+    assertRepoAllowed(repo);
     const q = ref ? `?ref=${encodeURIComponent(ref)}` : "";
     const data = await gh(`/repos/${repo}/contents/${path}${q}`);
     return {
