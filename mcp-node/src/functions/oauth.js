@@ -9,8 +9,8 @@ const crypto = require("crypto");
 const { getSecret } = require("../lib/secrets");
 const { clientIp, authThrottleRetryAfter, recordAuthFailure, recordAuthSuccess } = require("../lib/throttle");
 
-// Constant-time string compare (mirrors auth.ts timingSafeStringEqual): a length
-// mismatch still runs a constant-time compare so length isn't leaked by timing.
+// Constant-time string compare: a length mismatch still runs a fixed-time
+// comparison so length isn't leaked by timing.
 function timingSafeEqual(a, b) {
   const aBuf = Buffer.from(String(a), "utf8");
   const bBuf = Buffer.from(String(b), "utf8");

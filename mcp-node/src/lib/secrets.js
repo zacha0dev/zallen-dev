@@ -11,7 +11,9 @@ const cache = new Map(); // name -> { value, at }
 // rotates to revoke access, so a warm instance serving a stale cached value
 // would keep a revoked credential alive for up to TTL_MS. Bypassing the cache
 // on these (both read and store) makes rotation/revocation immediate.
-// Mirrors the NO_CACHE concept in the i2-ops reference secrets.ts.
+// Rotatable credentials (bearer, OAuth secret) are never cached, so a rotation
+// or revoke takes effect immediately instead of being served stale from a warm
+// instance.
 const NO_CACHE = new Set(["mcp-bearer-token", "oauth-client-secret", "oauth-client-id"]);
 
 let client;

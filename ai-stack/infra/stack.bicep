@@ -56,19 +56,19 @@ param embeddingProvider string = 'openai'
 @allowed([ 'anthropic', 'openai' ])
 param llmProvider string = 'anthropic'
 
-@description('Model tier for the reasoner PRODUCE step (the I-COST-1 knob). Swap to a cheaper model to cut cost without a code change.')
+@description('Model tier for the reasoner PRODUCE step (a cost knob). Swap to a cheaper model to cut cost without a code change.')
 param modelReasoner string = 'claude-sonnet-4-5'
 
 @description('Model tier for the output-checker GRADE step. A cheap Haiku-class model keeps the gate inexpensive.')
 param modelChecker string = 'claude-haiku-4-5'
 
-@description('Model tier for the TRAINER ENRICH step (Phase 3, the I-COST-1 knob). A sonnet-class model; swap it to cut enrichment cost without a code change.')
+@description('Model tier for the TRAINER ENRICH step (Phase 3, a cost knob). A sonnet-class model; swap it to cut enrichment cost without a code change.')
 param modelTrainer string = 'claude-sonnet-4-5'
 
-@description('Model tier for the RESEARCHER role agent (Phase 4 example role). Cheap Haiku-class default; the depth=deep flag promotes to Sonnet at call time. The I-COST-1 knob - lower it to cut research cost without a code change.')
+@description('Model tier for the RESEARCHER role agent (Phase 4 example role). Cheap Haiku-class default; the depth=deep flag promotes to Sonnet at call time. A cost knob - lower it to cut research cost without a code change.')
 param modelResearcher string = 'claude-haiku-4-5'
 
-@description('Model tier for the DRAFTER role agent (Phase 4 example role). Cheap Haiku-class default; FORMAT_DEPTH=deep promotes to Sonnet. The I-COST-1 knob - lower it to cut drafting cost without a code change.')
+@description('Model tier for the DRAFTER role agent (Phase 4 example role). Cheap Haiku-class default; FORMAT_DEPTH=deep promotes to Sonnet. A cost knob - lower it to cut drafting cost without a code change.')
 param modelDrafter string = 'claude-haiku-4-5'
 
 @description('Drafter depth (Phase 4): default | deep. deep promotes the drafter to its Sonnet-class tier for higher-quality generation.')
@@ -235,7 +235,7 @@ var agentEnv = [
 // Agent-plane settings shared by every app that runs an agent loop. The reasoner
 // (RAG app serves /agents/reasoner) and the Phase-3 trainer (system app serves
 // /agents/trainer, reusing the same output-checker) both read these. LLM_PROVIDER
-// + the model tiers + MAX_BATCH_NODES are the I-COST-1 knobs - change them here to
+// + the model tiers + MAX_BATCH_NODES are the cost knobs - change them here to
 // swap models or cut cost without a code change.
 var agentLlmEnv = [
   { name: 'LLM_PROVIDER', value: llmProvider }

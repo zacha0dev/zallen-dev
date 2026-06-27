@@ -371,7 +371,7 @@ fallback.
 - **Cheap-first gating.** Deterministic checks are free; the LLM grade (a
   Haiku-class model) runs only after they pass. The expensive produce model is
   the only costly call, and it is capped by `maxIterations`.
-- **The I-COST-1 knobs** (change a model or cut cost with no code change):
+- **The cost knobs** (change a model or cut cost with no code change):
   | Knob | What it does |
   |---|---|
   | `MODEL_REASONER` | the reasoner produce-step model tier |

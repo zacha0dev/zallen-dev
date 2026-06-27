@@ -24,7 +24,7 @@ const REASONER_SPEC = {
   // via REASONER_MAX_ITERATIONS, but capped here as the hard default.
   maxIterations: 3,
 
-  // The model tier the runner uses for the PRODUCE step. The I-COST-1 knob:
+  // The model tier the runner uses for the PRODUCE step. The cost knob:
   // MODEL_REASONER swaps the tier without a code change (e.g. drop to a cheaper
   // model to cut cost). The checker uses its own MODEL_CHECKER (Haiku-class).
   modelEnv: "MODEL_REASONER",
