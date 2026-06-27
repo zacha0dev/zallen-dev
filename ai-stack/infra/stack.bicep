@@ -56,7 +56,7 @@ param embeddingProvider string = 'openai'
 @allowed([ 'anthropic', 'openai' ])
 param llmProvider string = 'anthropic'
 
-@description('Model tier for the reasoner PRODUCE step (the I-COST-1 knob). Swap to a cheaper model to cut cost without a code change.')
+@description('Model tier for the reasoner PRODUCE step (a cost knob). Swap to a cheaper model to cut cost without a code change.')
 param modelReasoner string = 'claude-sonnet-4-5'
 
 @description('Model tier for the output-checker GRADE step. A cheap Haiku-class model keeps the gate inexpensive.')
