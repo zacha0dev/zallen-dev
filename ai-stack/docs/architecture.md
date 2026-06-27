@@ -173,6 +173,14 @@ The detached run flips the row `running` → `done | dlq | error`. The caller po
 `GET /agents/reasoner/status?job_id=` (proxied through the node as
 `reasoner_status`). Lifecycle: `pending → running → done | dlq | error`.
 
+The **trainer uses the same async-persist shape** via a parallel path
+(`trainer-jobs.js` → `trainer_jobs` + `enrichment_tracker`) rather than
+generalizing the reasoner's `jobs.js`/`reasoner_jobs` — the low-risk choice that
+leaves the stacked reasoner path untouched. `POST /agents/trainer` → `202
+{ job_id }`; `GET /agents/trainer/status` (proxied as `trainer_status`) reads the
+batch row back, and the per-node grades live in `enrichment_tracker`. If a future
+phase wants ONE generic `agent_jobs` table, both paths collapse into it then.
+
 ## The manifest-registration seam
 
 This is what makes the system extensible without redeploying the node.
