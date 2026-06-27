@@ -92,6 +92,8 @@ const server = http.createServer(async (req, res) => {
       "/rag/search",
       "/agents/reasoner",
       "/agents/reasoner/status",
+      "/agents/trainer",
+      "/agents/trainer/status",
     ];
     if (!KNOWN.includes(url)) {
       return send(res, 404, { error: "not found" });
