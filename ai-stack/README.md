@@ -54,7 +54,8 @@ the exact wiring commands at the end.
   agent and a delivery/engagement agent.
 
 Plus Key Vault, a managed identity scoped to the resource group, Application
-Insights, and a monthly cost cap.
+Insights, a Basic Azure Container Registry (the image store `az acr build` builds
+the container into), and a monthly cost cap.
 
 ## How it stacks
 
