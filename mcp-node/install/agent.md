@@ -107,3 +107,13 @@ Tell the user the resource group, the monthly cap, and where budget alerts go.
 
 Rules: deploy only into the one resource group you create; do not raise the cap
 without asking; on any failure, stop and show the real error.
+
+## 9. (Optional) Add the brains
+
+The node is now live and connectable. To give it RAG + agents (a reasoner/
+orchestrator, a trainer, role agents, and workflows), stand up the ai-stack
+extension on top of it next:
+https://github.com/zacha0dev/zallen-dev/blob/main/ai-stack/install/agent.md .
+You will need this node's resource group, function-app name, and Key Vault name
+to wire the two together; the node then discovers ai-stack's agents as tools
+automatically.

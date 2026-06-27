@@ -73,6 +73,37 @@ clear "set github-token" message instead of failing hard.
 These manage OTHER resource groups, so they need the opt-in subscription grant
 ([Scaling](08-scaling.md)); without it they return a clear 403.
 
+### rag - `tools/rag.js`
+- `rag_search` - search the ai-stack RAG store (hybrid vector plus keyword) and
+  return the top matching chunks.
+
+This is the node's static bridge into the ai-stack data plane. It calls the RAG
+service's `/rag/search` over HTTP, using `AI_STACK_URL` for the base and the
+`rag-bearer-token` Key Vault secret for auth. Both are fail-closed: if either is
+unset the tool returns a clear message instead of crashing, so a base node
+(no ai-stack wired) still lists every other tool.
+
+## Dynamically discovered tools - `tools/dynamic.js`
+
+The static tools above always ship. On top of them the node can ALSO discover
+tools from a connected ai-stack at runtime - no node redeploy. On cold start (and
+every 5 minutes after) `tools/dynamic.js` fetches ai-stack's `GET /mcp/tools`
+manifest and registers each entry as a proxy tool whose handler forwards the call
+back to ai-stack over HTTP (carrying the `rag-bearer-token`). So adding an agent
+to ai-stack makes it appear in this node's tool list automatically.
+
+- Turned on by setting `AI_STACK_TOOLS_URL` (the manifest endpoint) on the node;
+  unset = discovery is a graceful no-op and only the static tools are served.
+- A dynamic tool whose name collides with a static one is ignored (static wins),
+  so the static `rag_search` above keeps working even when the manifest also
+  advertises one.
+- On an ai-stack outage the node serves the last good manifest (in-process memo,
+  then the Key Vault cache), never crashing the tool list.
+
+The agents this surfaces (reasoner, trainer, researcher, drafter, workflows) and
+how to wire the two stacks are covered in `instructions.md` and the ai-stack docs
+(`ai-stack/docs/architecture.md`, the manifest-registration seam).
+
 ## Writing a good tool
 
 - a clear **name** and **description** (the model chooses by these),

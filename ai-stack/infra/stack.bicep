@@ -1,8 +1,10 @@
 // stack.bicep - ai-stack (Project 2), deployed into ONE resource group on top of
-// a running mcp-node. Creates the RAG data plane (Postgres + pgvector, blob) and
-// the agent plane (Azure Container Apps), plus Key Vault, a scoped managed
-// identity, App Insights, and a monthly budget cap. Kept deliberately cheap:
-// smallest Burstable Postgres, container apps scale to zero.
+// a running mcp-node. Creates the RAG data plane (Postgres + pgvector, blob, the
+// RAG search service) and the agent plane (Azure Container Apps), plus Key Vault,
+// a scoped managed identity, App Insights, an Azure Container Registry (the image
+// store deploy.sh builds into via `az acr build`), and a monthly budget cap. Kept
+// deliberately cheap: smallest Burstable Postgres, container apps scale to zero,
+// Basic-tier ACR.
 targetScope = 'resourceGroup'
 
 @description('Azure region.')
@@ -36,10 +38,50 @@ param pgAdminLogin string = 'pgadmin'
 @secure()
 param pgAdminPassword string
 
-@description('Container image for the agents. Defaults to a placeholder until the real agent image is published.')
+@description('Bearer token protecting the RAG service HTTP surface. Generate at install and store in Key Vault.')
+@secure()
+param ragBearerToken string
+
+@description('Container image (repo:tag) for the agents. deploy.sh builds this into the stack ACR via `az acr build`. Leave at the placeholder for a first bicep-only deploy; deploy.sh overrides it with the ACR image reference.')
 param agentImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
 
-@description('The mcp-node MCP URL this stack registers with (Project 1 control plane).')
+@description('Container image (repo:tag) for the RAG search service. deploy.sh builds this into the stack ACR via `az acr build`. Leave at the placeholder for a first bicep-only deploy; deploy.sh overrides it with the ACR image reference.')
+param ragImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+
+@description('Embedding provider for the RAG plane: openai | azure | cohere. The matching API key must be seeded into Key Vault before ingest/search work.')
+@allowed([ 'openai', 'azure', 'cohere' ])
+param embeddingProvider string = 'openai'
+
+@description('LLM provider for the agent plane (reasoner produce + output-checker grade): anthropic | openai. The matching API key (anthropic-api-key | openai-api-key) must be seeded into Key Vault before the reasoner works.')
+@allowed([ 'anthropic', 'openai' ])
+param llmProvider string = 'anthropic'
+
+@description('Model tier for the reasoner PRODUCE step (the I-COST-1 knob). Swap to a cheaper model to cut cost without a code change.')
+param modelReasoner string = 'claude-sonnet-4-5'
+
+@description('Model tier for the output-checker GRADE step. A cheap Haiku-class model keeps the gate inexpensive.')
+param modelChecker string = 'claude-haiku-4-5'
+
+@description('Model tier for the TRAINER ENRICH step (Phase 3, the I-COST-1 knob). A sonnet-class model; swap it to cut enrichment cost without a code change.')
+param modelTrainer string = 'claude-sonnet-4-5'
+
+@description('Model tier for the RESEARCHER role agent (Phase 4 example role). Cheap Haiku-class default; the depth=deep flag promotes to Sonnet at call time. The I-COST-1 knob - lower it to cut research cost without a code change.')
+param modelResearcher string = 'claude-haiku-4-5'
+
+@description('Model tier for the DRAFTER role agent (Phase 4 example role). Cheap Haiku-class default; FORMAT_DEPTH=deep promotes to Sonnet. The I-COST-1 knob - lower it to cut drafting cost without a code change.')
+param modelDrafter string = 'claude-haiku-4-5'
+
+@description('Drafter depth (Phase 4): default | deep. deep promotes the drafter to its Sonnet-class tier for higher-quality generation.')
+@allowed([ 'default', 'deep' ])
+param formatDepth string = 'default'
+
+@description('The example role agents the agents Container App runs (Phase 4). Comma-separated; the two generalized examples are researcher + drafter. A deployer adds a forked role by appending its name here once its spec+runner+manifest entry ship.')
+param agentRoles string = 'researcher,drafter'
+
+@description('Max nodes the trainer processes in one batch run (the trainer cost ceiling). Worst-case run cost scales with this; lower it to cap spend per run.')
+param maxBatchNodes int = 50
+
+@description('The mcp-node MCP URL this stack registers with (Project 1 control plane). Phase 5: a COMBINED project-1+2 workflow (e.g. summarize_repo_file) calls the node tools at this URL via MCP_NODE_URL; leave empty to run project-2-only workflows.')
 param mcpNodeUrl string = ''
 
 @description('Daily Log Analytics ingestion cap (GB).')
@@ -50,6 +92,7 @@ var kvName = '${stackName}-kv-${suffix}'
 var pgName = '${stackName}-pg-${suffix}'
 var saName = toLower('${stackName}${suffix}')
 var caeName = '${stackName}-cae-${suffix}'
+var acrName = toLower('${stackName}acr${suffix}')
 var kvSecretsOfficerRoleId = 'b86a8fe4-44ce-4948-aa7b-9d8c4f9b8e4a' // Key Vault Secrets Officer
 var kvSecretsUserRoleId = '4633458b-17de-408a-b874-0445c86b69e6' // Key Vault Secrets User
 var contributorRoleId = 'b24988ac-6180-42a0-bb6f-0d3e8c0e7c0e' // Contributor
@@ -69,6 +112,17 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   location: location
   kind: 'web'
   properties: { Application_Type: 'web', WorkspaceResourceId: law.id }
+}
+
+// Azure Container Registry (Basic) - the image store deploy.sh builds the RAG +
+// agent images into via `az acr build` (server-side build, so no local Docker is
+// needed). Admin user enabled so the Container Apps can pull with a registry
+// username/password secret without an extra role-assignment round-trip.
+resource acr 'Microsoft.ContainerRegistry/registries@2023-11-01-preview' = {
+  name: acrName
+  location: location
+  sku: { name: 'Basic' }
+  properties: { adminUserEnabled: true }
 }
 
 // Blob storage - the raw documents / data sources for RAG.
@@ -130,6 +184,13 @@ resource pgSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   name: 'pg-admin-password'
   properties: { value: pgAdminPassword }
 }
+// Bearer token for the RAG service HTTP surface; the node's rag_search tool
+// reads the same value from its own vault to call the service.
+resource ragTokenSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: kv
+  name: 'rag-bearer-token'
+  properties: { value: ragBearerToken }
+}
 resource kvInstaller 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(kv.id, installerObjectId, kvSecretsOfficerRoleId)
   scope: kv
@@ -163,25 +224,96 @@ var agentEnv = [
   { name: 'PG_DATABASE', value: 'rag' }
   { name: 'PG_USER', value: pgAdminLogin }
   { name: 'DOCS_STORAGE_ACCOUNT', value: sa.name }
+  // MCP_NODE_URL - the project-1 (mcp-node) control plane. Phase 5: a COMBINED
+  // workflow (summarize_repo_file) calls the node's tools (github_get_file) at
+  // this URL via makeNodeToolCaller. Empty => project-2-only workflows still run;
+  // a combined workflow's tool step then fails with a clear "MCP_NODE_URL unset".
   { name: 'MCP_NODE_URL', value: mcpNodeUrl }
   { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: appInsights.properties.ConnectionString }
 ]
 
-// System app - the trainer + manager/orchestrator agent.
+// Agent-plane settings shared by every app that runs an agent loop. The reasoner
+// (RAG app serves /agents/reasoner) and the Phase-3 trainer (system app serves
+// /agents/trainer, reusing the same output-checker) both read these. LLM_PROVIDER
+// + the model tiers + MAX_BATCH_NODES are the I-COST-1 knobs - change them here to
+// swap models or cut cost without a code change.
+var agentLlmEnv = [
+  { name: 'LLM_PROVIDER', value: llmProvider }
+  { name: 'MODEL_REASONER', value: modelReasoner }
+  { name: 'MODEL_CHECKER', value: modelChecker }
+  { name: 'MODEL_TRAINER', value: modelTrainer }
+  { name: 'MODEL_RESEARCHER', value: modelResearcher }
+  { name: 'MODEL_DRAFTER', value: modelDrafter }
+  { name: 'FORMAT_DEPTH', value: formatDepth }
+  { name: 'MAX_BATCH_NODES', value: string(maxBatchNodes) }
+]
+
+// ACR pull credentials, shared by every container app so they can pull the
+// images deploy.sh builds into the registry. Admin user is enabled on the ACR.
+var acrServer = acr.properties.loginServer
+var acrRegistries = [
+  {
+    server: acrServer
+    username: acr.listCredentials().username
+    passwordSecretRef: 'acr-password'
+  }
+]
+var acrSecrets = [
+  { name: 'acr-password', value: acr.listCredentials().passwords[0].value }
+]
+
+// RAG search service - the data-plane HTTP surface (/rag/ingest, /rag/search) AND
+// the agent surface (/agents/reasoner, /mcp/tools). External ingress so the
+// mcp-node can reach it; bearer-protected (rag-bearer-token) at the app layer.
+resource ragApp 'Microsoft.App/containerApps@2024-03-01' = {
+  name: '${stackName}-rag'
+  location: location
+  identity: { type: 'SystemAssigned' }
+  properties: {
+    managedEnvironmentId: cae.id
+    configuration: {
+      ingress: { external: true, targetPort: 8080 }
+      registries: acrRegistries
+      secrets: acrSecrets
+    }
+    template: {
+      containers: [
+        {
+          name: 'rag'
+          image: ragImage
+          resources: { cpu: json('0.25'), memory: '0.5Gi' }
+          env: concat(agentEnv, agentLlmEnv, [
+            { name: 'EMBEDDING_PROVIDER', value: embeddingProvider }
+            { name: 'PORT', value: '8080' }
+          ])
+        }
+      ]
+      scale: { minReplicas: 0, maxReplicas: 2 }
+    }
+  }
+}
+
+// System app - the trainer + manager/orchestrator agent. Gets the agent-plane LLM
+// settings so the Phase-3 trainer can reuse the output-checker and read its
+// MODEL_TRAINER + MAX_BATCH_NODES knobs.
 resource systemApp 'Microsoft.App/containerApps@2024-03-01' = {
   name: '${stackName}-system'
   location: location
   identity: { type: 'SystemAssigned' }
   properties: {
     managedEnvironmentId: cae.id
-    configuration: { ingress: { external: false, targetPort: 8080 } }
+    configuration: {
+      ingress: { external: false, targetPort: 8080 }
+      registries: acrRegistries
+      secrets: acrSecrets
+    }
     template: {
       containers: [
         {
           name: 'system'
           image: agentImage
           resources: { cpu: json('0.25'), memory: '0.5Gi' }
-          env: concat(agentEnv, [ { name: 'AGENT_ROLE', value: 'system' } ])
+          env: concat(agentEnv, agentLlmEnv, [ { name: 'AGENT_ROLE', value: 'system' } ])
         }
       ]
       scale: { minReplicas: 0, maxReplicas: 1 }
@@ -189,21 +321,33 @@ resource systemApp 'Microsoft.App/containerApps@2024-03-01' = {
   }
 }
 
-// Agents app - role-based example agents (solution-architect + delivery/engagement).
+// Agents app - the Phase-4 example ROLE agents. The deferred AGENT_ROLE slots are
+// now wired to the two GENERALIZED example roles, RESEARCHER + DRAFTER (serving
+// /agents/researcher + /agents/drafter). AGENT_ROLES lists which roles this app
+// runs; a deployer forks a role by appending its name once its spec+runner+
+// manifest entry ship. The per-role model tiers (MODEL_RESEARCHER, MODEL_DRAFTER,
+// FORMAT_DEPTH) come in via agentLlmEnv above.
 resource agentsApp 'Microsoft.App/containerApps@2024-03-01' = {
   name: '${stackName}-agents'
   location: location
   identity: { type: 'SystemAssigned' }
   properties: {
     managedEnvironmentId: cae.id
-    configuration: { ingress: { external: false, targetPort: 8080 } }
+    configuration: {
+      ingress: { external: false, targetPort: 8080 }
+      registries: acrRegistries
+      secrets: acrSecrets
+    }
     template: {
       containers: [
         {
           name: 'agents'
           image: agentImage
           resources: { cpu: json('0.25'), memory: '0.5Gi' }
-          env: concat(agentEnv, [ { name: 'AGENT_ROLE', value: 'agents' } ])
+          env: concat(agentEnv, agentLlmEnv, [
+            { name: 'AGENT_ROLE', value: 'agents' }
+            { name: 'AGENT_ROLES', value: agentRoles }
+          ])
         }
       ]
       scale: { minReplicas: 0, maxReplicas: 1 }
@@ -211,7 +355,17 @@ resource agentsApp 'Microsoft.App/containerApps@2024-03-01' = {
   }
 }
 
-// Both apps may read secrets from the vault.
+// All three apps may read secrets from the vault (PG password, embedding key,
+// LLM key, RAG bearer token).
+resource kvRag 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(kv.id, ragApp.id, kvSecretsUserRoleId)
+  scope: kv
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', kvSecretsUserRoleId)
+    principalId: ragApp.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
 resource kvSystem 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(kv.id, systemApp.id, kvSecretsUserRoleId)
   scope: kv
@@ -250,7 +404,11 @@ resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
 
 output postgresHost string = pg.properties.fullyQualifiedDomainName
 output ragDatabase string = 'rag'
+output ragServiceUrl string = 'https://${ragApp.properties.configuration.ingress.fqdn}'
+output toolsManifestUrl string = 'https://${ragApp.properties.configuration.ingress.fqdn}/mcp/tools'
 output storageAccount string = sa.name
 output keyVaultName string = kv.name
+output acrName string = acr.name
+output acrLoginServer string = acr.properties.loginServer
 output systemAppName string = systemApp.name
 output agentsAppName string = agentsApp.name

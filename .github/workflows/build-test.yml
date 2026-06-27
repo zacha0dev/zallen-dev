@@ -1,0 +1,111 @@
+# build-test.yml - the AI-stack build-test / what-if gate.
+#
+# Runs on every PR that touches mcp-node/ or ai-stack/, and on pushes to main.
+# It is the repeatable, no-Azure-login half of the deploy what-if: it compiles
+# both Bicep templates, syntax-checks every JavaScript file, and runs the agent
+# unit suites. The real `az deployment group what-if` needs live Azure creds, so
+# it is a SEPARATE, gated job (whatif) that only runs when an AZURE_CREDENTIALS
+# secret is present - documented below so a deployer can turn it on.
+name: build-test
+
+on:
+  pull_request:
+    paths:
+      - "mcp-node/**"
+      - "ai-stack/**"
+      - ".github/workflows/build-test.yml"
+  push:
+    branches: [main]
+    paths:
+      - "mcp-node/**"
+      - "ai-stack/**"
+
+jobs:
+  # build-test - no Azure login needed. This is the "what-if" you can always run:
+  # if the Bicep does not compile, the JS does not parse, or a unit test fails,
+  # the PR is not mergeable. Mirrors the local cycle in ai-stack/docs/extending.md
+  # "Build-test discipline".
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Bicep build - both templates must compile clean. `az bicep build` ships
+      # the Bicep CLI inside the runner's Azure CLI, so no separate install.
+      - name: Bicep build (ai-stack)
+        run: az bicep build --file ai-stack/infra/stack.bicep --stdout > /dev/null
+
+      - name: Bicep build (mcp-node)
+        run: az bicep build --file mcp-node/infra/node.bicep --stdout > /dev/null
+
+      # node --check - syntax-check every source file under both src trees.
+      - name: Syntax check (node --check)
+        run: |
+          fail=0
+          for f in $(find mcp-node/src ai-stack/src -name '*.js'); do
+            node --check "$f" || { echo "SYNTAX FAIL: $f"; fail=1; }
+          done
+          exit $fail
+
+      # Unit tests - the agent suites (reasoner, role-agents, trainer, workflows).
+      # They mock the llm/db/tools, so no secrets and no network are needed.
+      - name: Unit tests (ai-stack agents)
+        working-directory: ai-stack/src
+        run: node --test
+
+  # whatif - the REAL `az deployment group what-if`, gated on creds existing.
+  # It does a no-write preview of the deployment against a live subscription, so
+  # it needs an AZURE_CREDENTIALS repo secret (output of
+  # `az ad sp create-for-rbac --sdk-auth`, scoped to the target RG) plus a
+  # RESOURCE_GROUP repo variable. Without the secret the job is skipped, so the
+  # PR gate above still works on a fork or a fresh clone. Turn it on by adding
+  # the secret + variable; the bicep's @secure params are passed dummy values
+  # because what-if does not persist them.
+  whatif:
+    runs-on: ubuntu-latest
+    needs: build-test
+    if: ${{ github.event_name == 'pull_request' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for Azure creds
+        id: creds
+        run: |
+          if [ -n "${{ secrets.AZURE_CREDENTIALS }}" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "No AZURE_CREDENTIALS secret; skipping the live what-if (build-test already gated the PR)."
+          fi
+
+      - name: Azure login
+        if: steps.creds.outputs.present == 'true'
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: what-if (mcp-node)
+        if: steps.creds.outputs.present == 'true'
+        run: |
+          az deployment group what-if \
+            --resource-group "${{ vars.RESOURCE_GROUP }}" \
+            --template-file mcp-node/infra/node.bicep \
+            --parameters alertEmail=ci@example.com \
+                         budgetStartDate=2026-01-01 \
+                         installerObjectId=00000000-0000-0000-0000-000000000000
+
+      - name: what-if (ai-stack)
+        if: steps.creds.outputs.present == 'true'
+        run: |
+          az deployment group what-if \
+            --resource-group "${{ vars.RESOURCE_GROUP }}" \
+            --template-file ai-stack/infra/stack.bicep \
+            --parameters alertEmail=ci@example.com \
+                         budgetStartDate=2026-01-01 \
+                         installerObjectId=00000000-0000-0000-0000-000000000000 \
+                         pgAdminPassword=DummyWhatIfPassw0rd! \
+                         ragBearerToken=dummywhatifbearer
