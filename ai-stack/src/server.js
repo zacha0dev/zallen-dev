@@ -8,6 +8,8 @@
 //   POST /rag/search                   - bearer-protected; body { query, ... }
 //   POST /agents/reasoner              - bearer-protected; starts a job -> 202 + job_id
 //   GET  /agents/reasoner/status?job_id= - bearer-protected; the job row
+//   POST /agents/trainer               - bearer-protected; starts a batch job -> 202 + job_id
+//   GET  /agents/trainer/status?job_id= - bearer-protected; the trainer job row
 // Bearer check uses the same KV-secret + timing-safe compare as lib/auth.js.
 const http = require("http");
 const { authorized } = require("./lib/auth");
