@@ -182,6 +182,65 @@ leaves the stacked reasoner path untouched. `POST /agents/trainer` → `202
 batch row back, and the per-node grades live in `enrichment_tracker`. If a future
 phase wants ONE generic `agent_jobs` table, both paths collapse into it then.
 
+## The role agents — RESEARCHER + DRAFTER (Phase 4)
+
+Where the reasoner LOOPS and the trainer BATCHES, the two Phase-4 role agents are
+**single-call WORKERS** — generalized example roles any deployer grasps and forks.
+They share the **same SPEC + runner + ctx-injection pattern**, but each makes
+exactly ONE model call (no produce→gate→retry loop) and returns its result
+directly (a SYNC route, 200, not the async-job 202 envelope).
+
+| Role | Tool | Tools it uses | One call is… | Output schema |
+|---|---|---|---|---|
+| **RESEARCHER** | `researcher_run` | `rag_search` (once) + 1 chat | embed + chat | `{ summary, citations:[{chunkId,excerpt}], confidence }` |
+| **DRAFTER** | `drafter_run` | none (pure generation) | 1 chat | `{ draft, format, wordCount, warnings[] }` |
+
+- **RESEARCHER** surveys the RAG store once, synthesizes a concise answer, and
+  **cites every claim with a chunk id**. Its runner's `groundCitations` is the
+  anti-fabrication guard: any citation whose `chunkId` is NOT among the surveyed
+  hits is dropped, and a missing excerpt is backfilled from the real hit — so the
+  worker can only cite what it actually retrieved. The `depth` flag is the cost
+  trade: `shallow` → Haiku (default), `deep` → Sonnet (`MODEL_RESEARCHER` can only
+  lower the tier).
+- **DRAFTER** is pure generation in a target `format` (markdown | json |
+  plaintext) — no tools, the cheapest worker. Its `warnings[]` surface a **thin
+  context** signal (context below `thinContextChars`) so the caller knows to run
+  RESEARCHER first and re-draft from richer context; for `json` it warns (not
+  throws) when the draft doesn't parse. Haiku by default; `FORMAT_DEPTH=deep`
+  promotes to Sonnet (`MODEL_DRAFTER` overrides outright).
+
+### How the reasoner dispatches to a role (the dispatch seam, made real)
+
+The reasoner's loop always had a "dispatch" comment where it could hand off
+instead of producing directly. `agents/dispatch.js` turns that into a real,
+testable registry (`{ researcher, drafter }`, each `{ run, spec }`):
+
+```
+reasoner.run({ task, dispatch: "researcher", dispatchInput: { question } })
+   │
+   ▼  parseDispatch(task) finds a `dispatch` directive
+dispatch(directive, ctx) ── routes to the role's run(input, ctx) ──► { result, spec }
+   │                         (or a linked workflow via ctx.workflows; "workflow:<name>")
+   ▼
+gate ── output-checker.check() against the ROLE's own outputSchema ──► pass → return
+                                                                       fail → DLQ
+```
+
+It is **minimal + backward-compatible**: with no `dispatch` field on the task the
+reasoner produces directly, exactly as before — every pre-Phase-4 reasoner test
+passes untouched. A dispatched worker is single-call, so a gate failure
+dead-letters immediately (there is no produce loop to retry it). The result is
+gated against the ROLE's schema (`{summary,citations}` / `{draft,...}`), not the
+reasoner's `{answer,citations}`. `ctx.roles` / `ctx.workflows` are the override
+seams a test (or a richer deployer agent) uses to inject custom roles/workflows.
+
+### Kickstart artifacts (two per role)
+
+Each role ships its **`*.spec.js`** (the editable identity a deployer copies) and
+an **`*.examples.js`** (sample input → expected-shape pairs that double as the
+smoke fixtures the unit test drives the runner with). Fork a role = copy the spec,
+edit the identity, copy the examples, run the build-tests.
+
 ## The manifest-registration seam
 
 This is what makes the system extensible without redeploying the node.
