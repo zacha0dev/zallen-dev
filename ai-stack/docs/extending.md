@@ -286,6 +286,13 @@ You validate an agent **without deploying** anything. Three checks:
    ```
    node ai-stack/src/agents/<name>.runner.test.js
    ```
+   For a **workflow**, the equivalent suite is `agents/workflows.test.js` — it
+   drives the engine with mocked agents/tools and asserts single-step + multi-step
+   output threading, the combined (stubbed node tool) chain, an unknown/empty
+   workflow throw, and a failing step surfacing cleanly:
+   ```
+   node ai-stack/src/agents/workflows.test.js
+   ```
 
 When all three are green, the agent is correct by construction. Deploy is a
 separate, deliberate step — building and extending never requires it.
