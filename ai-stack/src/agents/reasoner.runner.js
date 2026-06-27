@@ -98,6 +98,49 @@ async function run(task, ctx = {}) {
   const model = resolveModel(REASONER_SPEC, process.env);
   const maxIterations = resolveMaxIterations(REASONER_SPEC, process.env);
 
+  // DISPATCH seam (now real): if the task explicitly asks to hand off to a role
+  // agent (researcher/drafter) or a linked workflow, route to it, gate the
+  // dispatched result against THAT role's own outputSchema, and return. With no
+  // `dispatch` field on the task the reasoner produces directly, exactly as
+  // before - so the default path (and every existing test) is unchanged.
+  const directive = parseDispatch(task);
+  if (directive) {
+    log(ctx, { event: "reasoner_dispatch", task: taskText, kind: directive.kind, name: directive.name });
+    const { result, spec } = await dispatch(directive, ctx);
+    const verdict = await check(
+      taskText,
+      result,
+      spec
+        ? { schema: spec.outputSchema, requireCitations: spec.requireCitations }
+        : {},
+      ctx
+    );
+    log(ctx, {
+      event: "reasoner_dispatch_gate",
+      name: directive.name,
+      pass: verdict.pass,
+      stage: verdict.stage,
+      reason: verdict.reason,
+    });
+    if (verdict.pass) {
+      return {
+        status: "done",
+        result,
+        dispatchedTo: directive.name,
+        iterations: 0,
+        attempts: [{ iteration: 0, pass: true, stage: verdict.stage, dispatchedTo: directive.name }],
+      };
+    }
+    // A dispatched worker that fails the gate dead-letters immediately (a worker
+    // is single-call; there is no produce loop to retry it here).
+    const derr = new Error(`reasoner dispatch to '${directive.name}' failed the gate: ${verdict.reason}`);
+    derr.dlq = true;
+    derr.dispatchedTo = directive.name;
+    derr.attempts = [{ iteration: 0, pass: false, stage: verdict.stage, reason: verdict.reason }];
+    derr.iterations = 0;
+    throw derr;
+  }
+
   // SURVEY - gather grounding evidence once up front. Re-surveying per-iteration
   // is a future knob; for now evidence is stable and only the produce changes.
   const { hits } = await ctx.ragSearch({ query: taskText, topK });
