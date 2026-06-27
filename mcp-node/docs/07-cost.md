@@ -21,9 +21,13 @@ What the node costs, and what keeps it bounded.
 ## The guard
 
 The resource group has a monthly budget (default about $10) with alerts at
-50/80/100% of actual spend plus a forecast alert. Infrastructure the node deploys
-follows `kb/infra.md`: smallest sensible size tier, the cost shown before deploy,
-and tags so a project is clean to tear down.
+50/80/100% of actual spend plus a forecast alert. **Note: an Azure budget alerts,
+it does not hard-stop spend** - nothing is auto-shut-off when you cross it, so
+treat the alerts as a prompt to look at what is running, not a wall. Keeping the
+node scaled-to-zero and only deploying small, tagged infra is what actually
+bounds the bill. Infrastructure the node deploys follows `kb/infra.md`: smallest
+sensible size tier, the cost shown before deploy, and tags so a project is clean
+to tear down.
 
 ## Raising it
 

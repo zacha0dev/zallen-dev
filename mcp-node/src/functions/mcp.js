@@ -4,10 +4,25 @@
 // OAuth flow in oauth.js. On initialize the server also hands the client the
 // node's custom instructions (src/instructions.md).
 const { app } = require("@azure/functions");
+const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const { getSecret } = require("../lib/secrets");
+const { clientIp, authThrottleRetryAfter, recordAuthFailure, recordAuthSuccess } = require("../lib/throttle");
 const registry = require("../tools");
+
+// Constant-time string compare so a bearer check can't be timing-attacked.
+// Mirrors timingSafeStringEqual in the i2-ops reference (auth.ts): a length
+// mismatch still runs a constant-time compare to avoid leaking length.
+function timingSafeEqual(a, b) {
+  const aBuf = Buffer.from(String(a), "utf8");
+  const bBuf = Buffer.from(String(b), "utf8");
+  if (aBuf.length !== bBuf.length) {
+    crypto.timingSafeEqual(aBuf, aBuf);
+    return false;
+  }
+  return crypto.timingSafeEqual(aBuf, bBuf);
+}
 
 const PROTOCOL_VERSION = "2024-11-05";
 
@@ -39,7 +54,7 @@ async function authorized(request) {
   const bearer = header.replace(/^Bearer\s+/i, "");
   if (!bearer) return false;
   const expected = await getSecret("mcp-bearer-token");
-  return bearer === expected;
+  return timingSafeEqual(bearer, expected);
 }
 
 app.http("mcp", {
@@ -52,9 +67,24 @@ app.http("mcp", {
       return { status: 200, jsonBody: { name: "mcp-node", version: "1.0", protocol: PROTOCOL_VERSION } };
     }
 
+    // Per-IP failed-auth throttle: park an IP that keeps sending bad bearers
+    // so a warm instance isn't a free brute-force target. A valid bearer
+    // clears the IP, so legitimate callers are never throttled.
+    const ip = clientIp(request);
+    const retryAfter = authThrottleRetryAfter(ip);
+    if (retryAfter > 0) {
+      return {
+        status: 429,
+        headers: { "Retry-After": String(retryAfter) },
+        jsonBody: rpcError(null, -32002, "too many failed auth attempts; slow down"),
+      };
+    }
+
     if (!(await authorized(request))) {
+      recordAuthFailure(ip);
       return { status: 401, jsonBody: rpcError(null, -32001, "unauthorized") };
     }
+    recordAuthSuccess(ip);
 
     let msg;
     try {

@@ -61,9 +61,17 @@ $Host_    = $Out.functionHostName.value
 
 # --- seed secrets (retry while the KV role assignment propagates) ------------
 Write-Host "==> Seeding OAuth secrets into $KvName"
-$ClientId     = -join ((1..32)  | ForEach-Object { "{0:x}" -f (Get-Random -Max 16) })
-$ClientSecret = -join ((1..64)  | ForEach-Object { "{0:x}" -f (Get-Random -Max 16) })
-$Bearer       = -join ((1..64)  | ForEach-Object { "{0:x}" -f (Get-Random -Max 16) })
+# Cryptographically secure random hex (CSPRNG) - NOT System.Random/Get-Random,
+# which is not suitable for secrets. nHexChars must be even (1 byte = 2 hex).
+function New-SecretHex($nHexChars) {
+  $bytes = New-Object byte[] ($nHexChars / 2)
+  $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+  try { $rng.GetBytes($bytes) } finally { $rng.Dispose() }
+  -join ($bytes | ForEach-Object { "{0:x2}" -f $_ })
+}
+$ClientId     = New-SecretHex 32
+$ClientSecret = New-SecretHex 64
+$Bearer       = New-SecretHex 64
 function KvSet($name, $value) {
   for ($i = 1; $i -le 6; $i++) {
     az keyvault secret set --vault-name $KvName --name $name --value $value -o none 2>$null

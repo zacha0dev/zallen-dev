@@ -7,6 +7,13 @@ const { SecretClient } = require("@azure/keyvault-secrets");
 const TTL_MS = 60_000; // 1 minute; rotation is picked up within a minute
 const cache = new Map(); // name -> { value, at }
 
+// Some secrets must NEVER be cached - they are the credentials a deployer
+// rotates to revoke access, so a warm instance serving a stale cached value
+// would keep a revoked credential alive for up to TTL_MS. Bypassing the cache
+// on these (both read and store) makes rotation/revocation immediate.
+// Mirrors the NO_CACHE concept in the i2-ops reference secrets.ts.
+const NO_CACHE = new Set(["mcp-bearer-token", "oauth-client-secret", "oauth-client-id"]);
+
 let client;
 function getClient() {
   if (client) return client;
@@ -17,11 +24,13 @@ function getClient() {
 }
 
 async function getSecret(name) {
-  const hit = cache.get(name);
   const now = Date.now();
-  if (hit && now - hit.at < TTL_MS) return hit.value;
+  if (!NO_CACHE.has(name)) {
+    const hit = cache.get(name);
+    if (hit && now - hit.at < TTL_MS) return hit.value;
+  }
   const secret = await getClient().getSecret(name);
-  cache.set(name, { value: secret.value, at: now });
+  if (!NO_CACHE.has(name)) cache.set(name, { value: secret.value, at: now });
   return secret.value;
 }
 

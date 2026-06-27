@@ -7,6 +7,19 @@
 const { app } = require("@azure/functions");
 const crypto = require("crypto");
 const { getSecret } = require("../lib/secrets");
+const { clientIp, authThrottleRetryAfter, recordAuthFailure, recordAuthSuccess } = require("../lib/throttle");
+
+// Constant-time string compare (mirrors auth.ts timingSafeStringEqual): a length
+// mismatch still runs a constant-time compare so length isn't leaked by timing.
+function timingSafeEqual(a, b) {
+  const aBuf = Buffer.from(String(a), "utf8");
+  const bBuf = Buffer.from(String(b), "utf8");
+  if (aBuf.length !== bBuf.length) {
+    crypto.timingSafeEqual(aBuf, aBuf);
+    return false;
+  }
+  return crypto.timingSafeEqual(aBuf, bBuf);
+}
 
 // Short-lived auth codes. Single-tenant scale-to-zero node, so in-memory is
 // acceptable; codes expire in 10 minutes and are single-use.
@@ -53,6 +66,17 @@ app.http("token", {
   authLevel: "anonymous",
   route: "token",
   handler: async (request, context) => {
+    // Per-IP failed-auth throttle so /token isn't a free client-secret oracle.
+    const ip = clientIp(request);
+    const retryAfter = authThrottleRetryAfter(ip);
+    if (retryAfter > 0) {
+      return {
+        status: 429,
+        headers: { "Retry-After": String(retryAfter) },
+        jsonBody: { error: "slow_down" },
+      };
+    }
+
     const body = await request.text();
     const form = new URLSearchParams(body);
     const clientId = form.get("client_id");
@@ -65,9 +89,15 @@ app.http("token", {
       getSecret("mcp-bearer-token"),
     ]);
 
-    if (clientId !== expectedId || clientSecret !== expectedSecret) {
+    // Evaluate BOTH compares (no || short-circuit) before AND-ing, so neither
+    // the result nor the timing reveals which of id/secret was wrong.
+    const idOk = timingSafeEqual(clientId || "", expectedId);
+    const secretOk = timingSafeEqual(clientSecret || "", expectedSecret);
+    if (!(idOk && secretOk)) {
+      recordAuthFailure(ip);
       return { status: 401, jsonBody: { error: "invalid_client" } };
     }
+    recordAuthSuccess(ip);
 
     const entry = code && codes.get(code);
     if (!entry || Date.now() - entry.at > CODE_TTL_MS) {

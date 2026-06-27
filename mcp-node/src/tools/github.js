@@ -6,6 +6,30 @@ const { getSecret } = require("../lib/secrets");
 
 const API = "https://api.github.com";
 
+// Confused-deputy guard: the node's github-token may have wide scope, so a
+// caller-supplied `repo` must be restricted to the node's OWN repo. The allowed
+// repo comes from the NODE_REPO app setting (owner/name). If NODE_REPO is unset
+// we fail CLOSED - rather than guess, we refuse all repos with a clear message
+// telling the deployer to set NODE_REPO. Keep it simple: exact match only.
+function allowedRepo() {
+  return (process.env.NODE_REPO || "").trim();
+}
+
+function assertRepoAllowed(repo) {
+  const allowed = allowedRepo();
+  if (!allowed) {
+    throw new Error(
+      "NODE_REPO app setting is not set; GitHub tools are restricted to the node's own repo. " +
+        'Set NODE_REPO="owner/name" (the repo this node deploys from) to enable them.'
+    );
+  }
+  if (String(repo || "").trim().toLowerCase() !== allowed.toLowerCase()) {
+    throw new Error(
+      `Repo "${repo}" is not allowed; this node may only act on its own repo (${allowed}).`
+    );
+  }
+}
+
 async function token() {
   try {
     return await getSecret("github-token");
@@ -43,6 +67,7 @@ const getFile = {
     required: ["repo", "path"],
   },
   handler: async ({ repo, path, ref }) => {
+    assertRepoAllowed(repo);
     const q = ref ? `?ref=${encodeURIComponent(ref)}` : "";
     const data = await gh(`/repos/${repo}/contents/${path}${q}`);
     return {
@@ -69,6 +94,7 @@ const putFile = {
     required: ["repo", "path", "content", "message"],
   },
   handler: async ({ repo, path, content, message, branch, sha }) => {
+    assertRepoAllowed(repo);
     const body = {
       message,
       content: Buffer.from(content, "utf8").toString("base64"),
@@ -96,6 +122,7 @@ const dispatch = {
     required: ["repo", "workflow"],
   },
   handler: async ({ repo, workflow, ref }) => {
+    assertRepoAllowed(repo);
     await gh(`/repos/${repo}/actions/workflows/${workflow}/dispatches`, {
       method: "POST",
       body: JSON.stringify({ ref: ref || "main" }),

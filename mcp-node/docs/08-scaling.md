@@ -4,6 +4,20 @@
 
 From one node to many.
 
+**"Scaling" here means fan-out, not scale-up.** Everything below is about
+running MORE nodes (each its own RG, identity, and budget) - it does NOT make a
+single node bigger or faster. A single node already auto-scales its own
+Consumption plan horizontally per request; `enable-scaling` is purely a switch
+that grants the node rights to STAMP additional nodes.
+
+## How many nodes can I run?
+
+Azure caps Consumption (Y1) Function Apps at roughly **100 per region per
+subscription**. Spread across regions or use multiple subscriptions to go past
+that. If you need a single node to be *vertically* larger (more memory, no
+cold-start, longer runtime), that is a different plan entirely - an App Service
+or Elastic Premium plan - not anything `enable-scaling` does.
+
 ## Default: re-run the install
 
 Run the install again with a new node name. You get a second node in its own

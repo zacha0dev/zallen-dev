@@ -25,6 +25,9 @@ param alertEmail string
 @description('Daily Log Analytics ingestion cap (GB) - cost knob.')
 param logDailyQuotaGb int = 1
 
+@description('The repo this node deploys from (owner/name). Surfaced as the NODE_REPO app setting; the GitHub tools refuse any repo other than this one (confused-deputy guard). Leave empty to keep the GitHub tools disabled.')
+param nodeRepo string = ''
+
 @description('Object id of the principal running this deploy: az ad signed-in-user show --query id -o tsv. Granted Key Vault Secrets Officer so it can seed/rotate the OAuth secrets. On an RBAC vault, subscription Owner alone does NOT grant data-plane secret access - this is the reader-role wall.')
 param installerObjectId string
 
@@ -37,7 +40,7 @@ var saName = toLower('${nodeName}${suffix}')
 var kvName = '${nodeName}-kv-${suffix}'
 var funcName = '${nodeName}-func-${suffix}'
 var planName = '${nodeName}-plan-${suffix}'
-var kvSecretsOfficerRoleId = 'b86a8fe4-44ce-4948-aa7b-9d8c4f9b8e4a' // Key Vault Secrets Officer (read + write/rotate)
+var kvSecretsOfficerRoleId = 'b86a8fe4-44ce-4948-aa7b-9d8c44cf7174' // Key Vault Secrets Officer (read + write/rotate)
 
 resource law 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   name: '${nodeName}-law-${suffix}'
@@ -89,6 +92,7 @@ resource func 'Microsoft.Web/sites@2023-12-01' = {
         { name: 'KEY_VAULT_URL', value: kv.properties.vaultUri }
         { name: 'AZURE_SUBSCRIPTION_ID', value: subscription().subscriptionId }
         { name: 'AZURE_RESOURCE_GROUP', value: resourceGroup().name }
+        { name: 'NODE_REPO', value: nodeRepo }
       ]
     }
   }
@@ -137,7 +141,7 @@ resource kvInstallerRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = 
 // Full control inside its box; zero rights anywhere else in the subscription.
 // (Deploying this assignment requires the installer to be Owner / User Access
 // Administrator on the RG, which the subscription owner running the install is.)
-var contributorRoleId = 'b24988ac-6180-42a0-bb6f-0d3e8c0e7c0e' // Contributor
+var contributorRoleId = 'b24988ac-6180-42a0-bb6f-d3e8c08e7c0e' // Contributor
 resource rgRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(resourceGroup().id, func.id, contributorRoleId)
   scope: resourceGroup()

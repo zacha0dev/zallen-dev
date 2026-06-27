@@ -1,0 +1,21 @@
+# Secrets & local config — NEVER commit these
+local.settings.json
+.env
+.env.*
+*.pem
+*.key
+
+# Azure / tooling
+.azure/
+bin/
+obj/
+
+# Node
+node_modules/
+dist/
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
