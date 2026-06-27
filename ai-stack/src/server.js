@@ -59,6 +59,17 @@ function reasonerCtx() {
   };
 }
 
+// The ctx the trainer runs with: the real llm + logger. ctx.db (the tracker
+// handle, keyed to this run id) is supplied by trainerJobs.runDetached - it
+// wraps this ctx with makeDb(jobId). The trainer does not survey RAG, so no
+// ragSearch is wired.
+function trainerCtx() {
+  return {
+    llm,
+    logger: console,
+  };
+}
+
 const server = http.createServer(async (req, res) => {
   try {
     const fullUrl = req.url || "";
