@@ -235,7 +235,7 @@ var agentEnv = [
 // Agent-plane settings shared by every app that runs an agent loop. The reasoner
 // (RAG app serves /agents/reasoner) and the Phase-3 trainer (system app serves
 // /agents/trainer, reusing the same output-checker) both read these. LLM_PROVIDER
-// + the model tiers + MAX_BATCH_NODES are the I-COST-1 knobs - change them here to
+// + the model tiers + MAX_BATCH_NODES are the cost knobs - change them here to
 // swap models or cut cost without a code change.
 var agentLlmEnv = [
   { name: 'LLM_PROVIDER', value: llmProvider }
