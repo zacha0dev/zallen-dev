@@ -100,6 +100,39 @@ function drafterCtx() {
   };
 }
 
+// The ctx a WORKFLOW (Phase 5) runs with. It is the union of what its steps need:
+//   - llm + ragSearch  -> for the role-agent steps (researcher surveys RAG)
+//   - workflows         -> the named registry (so a step or the reasoner can chain
+//                          to ANOTHER workflow via "workflow:<name>")
+//   - tools             -> the PROJECT-1 (node) tool surface a COMBINED workflow
+//                          calls. Opt-in: makeNodeToolCaller(MCP_NODE_URL + the rag
+//                          bearer). If MCP_NODE_URL is unset, a tool step throws a
+//                          clear error only when it actually runs - project-2-only
+//                          workflows are unaffected.
+function workflowCtx() {
+  const nodeUrl = process.env.MCP_NODE_URL || "";
+  const nodeTool = makeNodeToolCaller({
+    url: nodeUrl,
+    // The bearer is read from KV lazily, per call, so a missing secret fails the
+    // tool step (not server boot) and an unused (project-2-only) workflow needs none.
+    bearer: undefined,
+    fetchImpl: async (url, opts) => {
+      const token = await getSecret("rag-bearer-token").catch(() => null);
+      if (token) {
+        opts.headers = Object.assign({}, opts.headers, { Authorization: `Bearer ${token}` });
+      }
+      return fetch(url, opts);
+    },
+  });
+  return {
+    llm,
+    ragSearch: (args) => search(args),
+    workflows: makeWorkflows(WORKFLOWS),
+    tools: { github_get_file: (args) => nodeTool("github_get_file", args) },
+    logger: console,
+  };
+}
+
 const server = http.createServer(async (req, res) => {
   try {
     const fullUrl = req.url || "";
