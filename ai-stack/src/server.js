@@ -12,6 +12,8 @@
 //   GET  /agents/trainer/status?job_id= - bearer-protected; the trainer job row
 //   POST /agents/researcher            - bearer-protected; SYNC single-call -> 200 + result
 //   POST /agents/drafter               - bearer-protected; SYNC single-call -> 200 + result
+//   POST /agents/workflow              - bearer-protected; SYNC run a named workflow -> 200 + { result, trace }
+//   GET  /agents/workflow/list         - bearer-protected; the available workflows + step shape
 // Bearer check uses the same KV-secret + timing-safe compare as lib/auth.js.
 const http = require("http");
 const { authorized } = require("./lib/auth");
