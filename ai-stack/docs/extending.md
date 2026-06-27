@@ -194,6 +194,70 @@ same shape under `ctx.workflows` with a `dispatch: "workflow:<name>"` directive 
 the seam Phase 5's workflow set fills in. With no `dispatch` field the reasoner
 produces directly, so adding a role never changes the default path.
 
+## Variant — a WORKFLOW (compose the workers into a chain)
+
+A worker does one job; a **workflow** (Phase 5) is a **named, ordered chain** of
+them — the way you compose RESEARCHER / DRAFTER / the gate / a node tool into a
+task that runs singly or composed. You add one by **editing data**, not the
+engine: copy a definition in `agents/workflows.defs.js`, rename it, edit the
+steps. The engine (`agents/workflows.js`) is reused unchanged.
+
+A workflow definition:
+
+```js
+const my_workflow = {
+  name: "my_workflow",
+  description: "One sentence: what this chain does.",
+  steps: [
+    { id: "first",  agent: "researcher" },                 // a PROJECT-2 role agent
+    { id: "second", agent: "drafter", inputFrom: (outputs, input) => ({
+        context: outputs.first.summary, format: "markdown",
+    }) },                                                    // reshape between steps
+  ],
+};
+// register it in the WORKFLOWS map at the bottom of workflows.defs.js
+```
+
+The rules, all you need to know:
+
+1. **A step is exactly ONE of `run` | `agent` | `tool`.**
+   - `run: async (input, { ctx, outputs, step }) => out` — any inline function
+     (e.g. call the shared `output-checker` like `enrich_and_check` does).
+   - `agent: "<name>"` — a role agent from `ctx.roles` (defaults: researcher,
+     drafter).
+   - `tool: "<name>"` — a PROJECT-1 node tool from `ctx.tools` (see the combined
+     pattern below).
+2. **`inputFrom` threads outputs.** Omit it → the step gets the workflow input;
+   `"<stepId>"` → that prior step's output; `(outputs, input) => any` → a mapper
+   (the general reshape). The runner returns
+   `{ status, workflow, result, outputs, trace }` — `result` is the last step's
+   output, `outputs` is every step keyed by id, `trace` is one entry per step.
+3. **A failing step surfaces cleanly** — the error carries `.workflow`, `.step`,
+   and the partial `.trace`. You do not handle this; the engine does.
+4. **Ship the kickstart pair.** Add an entry to `workflows.examples.js` (sample
+   input → expected run shape); it doubles as the smoke fixture the unit test
+   drives the engine with. Nothing else to register for discovery beyond the
+   defs map — `workflow_run` / `workflow_list` in the manifest are generic over
+   the whole set.
+
+### The combined PROJECT-1 + PROJECT-2 pattern
+
+To call a node (PROJECT-1) tool from a workflow, use a `tool` step. ai-stack
+reaches the node through **`ctx.tools`**; in production `server.js` wires that to
+`makeNodeToolCaller`, which POSTs `{ name, arguments }` to **`MCP_NODE_URL`** with
+the node bearer. `summarize_repo_file` is the worked example: `github_get_file`
+(node) → DRAFTER (ai-stack). It is **opt-in** — set `MCP_NODE_URL` (the
+`mcpNodeUrl` bicep param) to enable combined workflows; leave it empty and only
+project-2 workflows run, with a clear error if a tool step is hit. In a unit test
+`ctx.tools` is just a stub map, so you exercise the combined chain with no node.
+
+### Running a workflow from the reasoner
+
+A workflow is also reachable from the reasoner's dispatch seam: a task with
+`dispatch: "workflow:<name>"` resolves through `ctx.workflows`
+(`makeWorkflows(WORKFLOWS)`). So a reasoner job can hand off to a whole chain,
+not just a single role.
+
 ## Build-test discipline (no live deploy)
 
 You validate an agent **without deploying** anything. Three checks:
