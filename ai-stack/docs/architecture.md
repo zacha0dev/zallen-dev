@@ -404,6 +404,10 @@ fallback.
 | `src/agents/drafter.spec.js` / `drafter.runner.js` | the DRAFTER role agent (pure generation, format + thin-context warning) |
 | `src/agents/{researcher,drafter}.examples.js` | per-role kickstart examples + smoke fixtures |
 | `src/agents/dispatch.js` | the reasoner's dispatch registry (role/workflow routing) |
+| `src/agents/workflows.js` | the Phase-5 workflow engine (linear runner, ctx seam, node-tool caller) |
+| `src/agents/workflows.defs.js` | the example workflow SET (the copy-me artifact) |
+| `src/agents/workflows.examples.js` | per-workflow kickstart examples + smoke fixtures |
+| `src/agents/workflows.test.js` | mocked unit tests for the workflow engine |
 | `src/agents/role-agents.test.js` | mocked unit tests for the role agents + dispatch |
 | `src/agents/output-checker.js` | the shared two-stage gate (reasoner + trainer + role agents) |
 | `src/agents/jobs.js` | async-persist over `reasoner_jobs` |
