@@ -62,6 +62,12 @@ param modelReasoner string = 'claude-sonnet-4-5'
 @description('Model tier for the output-checker GRADE step. A cheap Haiku-class model keeps the gate inexpensive.')
 param modelChecker string = 'claude-haiku-4-5'
 
+@description('Model tier for the TRAINER ENRICH step (Phase 3, the I-COST-1 knob). A sonnet-class model; swap it to cut enrichment cost without a code change.')
+param modelTrainer string = 'claude-sonnet-4-5'
+
+@description('Max nodes the trainer processes in one batch run (the trainer cost ceiling). Worst-case run cost scales with this; lower it to cap spend per run.')
+param maxBatchNodes int = 50
+
 @description('The mcp-node MCP URL this stack registers with (Project 1 control plane).')
 param mcpNodeUrl string = ''
 
