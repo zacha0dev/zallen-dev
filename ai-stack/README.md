@@ -53,9 +53,26 @@ Postgres Flexible has an hourly floor (it does not scale to zero like Functions)
 so the cap is set a bit higher than mcp-node's. The default uses the smallest
 Burstable Postgres tier; raise `monthlyCapUsd` deliberately if you scale up.
 
+The reasoner loop is bounded by `maxIterations` (default 3): at most 3 produce
+calls (model: `MODEL_REASONER`) plus a cheap grade each (`MODEL_CHECKER`,
+Haiku-class) — and the grade only runs after the free deterministic gates pass.
+Swap models or lower the ceiling without a code change via those env knobs (plus
+`REASONER_MAX_ITERATIONS`). See the cost & safety model in the docs.
+
+## Docs
+
+- **[docs/architecture.md](./docs/architecture.md)** — how the two-project system
+  works: the reasoner → agents → output loop, async-persist, the RAG plane, the
+  manifest-registration seam, and the cost/safety model.
+- **[docs/extending.md](./docs/extending.md)** — the repeatable "add your own
+  agent" guide: the SPEC + runner pattern, manifest auto-discovery, and the
+  build-test discipline (bicep build + `node --check` + mocked unit tests, no
+  live deploy).
+
 ## Version
 
-v0.1 (foundation; agent images and ingest path are being built out)
+v0.2 (RAG plane + the reasoner agent loop, async-persist, and the
+manifest-registration seam; agent container images are built out next)
 
 ---
 
