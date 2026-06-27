@@ -94,9 +94,10 @@ drives a **bounded loop**:
 
 ### The output-checker (the gate)
 
-`output-checker.js` is a shared library — the reasoner uses it now, the Phase-3
-trainer reuses it. Its discipline: **deterministic gates first, LLM grade only if
-they pass.** We never spend a model call grading something a schema already
+`output-checker.js` is a shared library — the reasoner uses it, and the trainer
+reuses it **unchanged** (the trainer adds only its own free completeness pre-gate
+for the 10-dimension contract). Its discipline: **deterministic gates first, LLM
+grade only if they pass.** We never spend a model call grading something a schema already
 proves is broken, and we never blindly trust a float — the grader must return a
 parseable JSON verdict. On failure it returns a `structuredDiff` describing what
 to fix, which the loop feeds into the next attempt.
