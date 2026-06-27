@@ -143,6 +143,18 @@ const server = http.createServer(async (req, res) => {
       jobs.runDetached(jobId, task, reasonerRunner, reasonerCtx());
       return send(res, 202, { job_id: jobId, status: "pending" });
     }
+    if (url === "/agents/trainer") {
+      // Async-persist: create the batch job, kick off the enrichment loop
+      // detached (trainerJobs.runDetached wires the per-run tracker into ctx.db),
+      // return 202. The batch can outlast a request (N nodes x enrich+check).
+      const input = { nodes: body.nodes };
+      if (!Array.isArray(input.nodes) || input.nodes.length === 0) {
+        return send(res, 400, { error: "nodes (a non-empty array of { id, context }) is required" });
+      }
+      const jobId = await trainerJobs.createJob(input);
+      trainerJobs.runDetached(jobId, input, trainerRunner, trainerCtx());
+      return send(res, 202, { job_id: jobId, status: "pending" });
+    }
 
     return send(res, 404, { error: "not found" });
   } catch (err) {
