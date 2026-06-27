@@ -81,7 +81,7 @@ param agentRoles string = 'researcher,drafter'
 @description('Max nodes the trainer processes in one batch run (the trainer cost ceiling). Worst-case run cost scales with this; lower it to cap spend per run.')
 param maxBatchNodes int = 50
 
-@description('The mcp-node MCP URL this stack registers with (Project 1 control plane).')
+@description('The mcp-node MCP URL this stack registers with (Project 1 control plane). Phase 5: a COMBINED project-1+2 workflow (e.g. summarize_repo_file) calls the node tools at this URL via MCP_NODE_URL; leave empty to run project-2-only workflows.')
 param mcpNodeUrl string = ''
 
 @description('Daily Log Analytics ingestion cap (GB).')
