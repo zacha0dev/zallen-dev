@@ -23,6 +23,7 @@
 
 const { check } = require("./output-checker");
 const { REASONER_SPEC, resolveModel, resolveMaxIterations } = require("./reasoner.spec");
+const { dispatch, parseDispatch } = require("./dispatch");
 
 const PRODUCE_SYSTEM =
   "You are a careful reasoning agent. Answer the TASK using ONLY the supplied " +
