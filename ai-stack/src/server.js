@@ -111,6 +111,15 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, { job });
     }
 
+    // GET /agents/trainer/status?job_id=
+    if (req.method === "GET" && url === "/agents/trainer/status") {
+      const jobId = query.get("job_id");
+      if (!jobId) return send(res, 400, { error: "job_id is required" });
+      const job = await trainerJobs.getJob(jobId);
+      if (!job) return send(res, 404, { error: "job not found" });
+      return send(res, 200, { job });
+    }
+
     if (req.method !== "POST") {
       return send(res, 405, { error: "method not allowed" });
     }
