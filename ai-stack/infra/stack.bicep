@@ -317,7 +317,12 @@ resource systemApp 'Microsoft.App/containerApps@2024-03-01' = {
   }
 }
 
-// Agents app - role-based example agents (solution-architect + delivery/engagement).
+// Agents app - the Phase-4 example ROLE agents. The deferred AGENT_ROLE slots are
+// now wired to the two GENERALIZED example roles, RESEARCHER + DRAFTER (serving
+// /agents/researcher + /agents/drafter). AGENT_ROLES lists which roles this app
+// runs; a deployer forks a role by appending its name once its spec+runner+
+// manifest entry ship. The per-role model tiers (MODEL_RESEARCHER, MODEL_DRAFTER,
+// FORMAT_DEPTH) come in via agentLlmEnv above.
 resource agentsApp 'Microsoft.App/containerApps@2024-03-01' = {
   name: '${stackName}-agents'
   location: location
@@ -335,7 +340,10 @@ resource agentsApp 'Microsoft.App/containerApps@2024-03-01' = {
           name: 'agents'
           image: agentImage
           resources: { cpu: json('0.25'), memory: '0.5Gi' }
-          env: concat(agentEnv, agentLlmEnv, [ { name: 'AGENT_ROLE', value: 'agents' } ])
+          env: concat(agentEnv, agentLlmEnv, [
+            { name: 'AGENT_ROLE', value: 'agents' }
+            { name: 'AGENT_ROLES', value: agentRoles }
+          ])
         }
       ]
       scale: { minReplicas: 0, maxReplicas: 1 }
