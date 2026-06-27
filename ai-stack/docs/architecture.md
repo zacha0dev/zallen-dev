@@ -278,6 +278,9 @@ fallback.
   | `MODEL_REASONER` | the reasoner produce-step model tier |
   | `MODEL_TRAINER` | the trainer enrich-step model tier (sonnet-class) |
   | `MODEL_CHECKER` | the grade-step model tier (keep it cheap; shared by both) |
+  | `MODEL_RESEARCHER` | the researcher synthesize-step tier (overrides shallow; can only lower) |
+  | `MODEL_DRAFTER` | the drafter generate-step tier (overrides outright) |
+  | `FORMAT_DEPTH` | `deep` promotes the drafter (and is the researcher's deep flag analog) to its Sonnet tier |
   | `REASONER_MAX_ITERATIONS` | lower the reasoner loop ceiling (cannot raise above the spec cap) |
   | `TRAINER_MAX_ATTEMPTS` | lower the trainer per-node attempt ceiling (cannot raise above the spec cap) |
   | `MAX_BATCH_NODES` | cap the trainer batch size (the per-run cost ceiling) |
