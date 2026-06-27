@@ -12,8 +12,8 @@ const { clientIp, authThrottleRetryAfter, recordAuthFailure, recordAuthSuccess }
 const registry = require("../tools");
 
 // Constant-time string compare so a bearer check can't be timing-attacked.
-// Mirrors timingSafeStringEqual in the i2-ops reference (auth.ts): a length
-// mismatch still runs a constant-time compare to avoid leaking length.
+// A length mismatch still runs a fixed-time comparison and does not leak length
+// via timing.
 function timingSafeEqual(a, b) {
   const aBuf = Buffer.from(String(a), "utf8");
   const bBuf = Buffer.from(String(b), "utf8");
