@@ -10,6 +10,8 @@
 //   GET  /agents/reasoner/status?job_id= - bearer-protected; the job row
 //   POST /agents/trainer               - bearer-protected; starts a batch job -> 202 + job_id
 //   GET  /agents/trainer/status?job_id= - bearer-protected; the trainer job row
+//   POST /agents/researcher            - bearer-protected; SYNC single-call -> 200 + result
+//   POST /agents/drafter               - bearer-protected; SYNC single-call -> 200 + result
 // Bearer check uses the same KV-secret + timing-safe compare as lib/auth.js.
 const http = require("http");
 const { authorized } = require("./lib/auth");
