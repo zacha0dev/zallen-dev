@@ -7,6 +7,7 @@
 // HTTP route in server.js). The node auto-discovers it - no node redeploy. This
 // is the manifest-registration seam; see docs/extending.md.
 const { REASONER_SPEC } = require("./reasoner.spec");
+const { TRAINER_SPEC } = require("./trainer.spec");
 
 const TOOL_MANIFEST = [
   {
