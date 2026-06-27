@@ -15,14 +15,31 @@ A deployed mcp-node. Stand that up first (see [../mcp-node](../mcp-node)).
 
 ## Install
 
-Paste this into an agent CLI (Claude Code, Codex, Copilot, Gemini):
+First, a one-time check: [install/prereqs.md](./install/prereqs.md) (an Azure
+account, a running mcp-node, and an agent CLI).
+
+Then paste this into an agent CLI (Claude Code, Codex, Copilot, Gemini):
 
 ```
 Install ai-stack: read and follow https://github.com/zacha0dev/zallen-dev/blob/main/ai-stack/install/agent.md
 ```
 
-It deploys the resource group, the data plane, and the agents, then prints how to
-connect. No agent CLI? Run `scripts/deploy.sh`.
+The agent checks prerequisites, deploys the resource group + data plane + agents,
+builds the container image server-side (`az acr build` — no local Docker), seeds
+the API keys, applies the database schema, and wires the mcp-node. No agent CLI?
+Run the script directly:
+
+```
+# macOS / Linux
+ALERT_EMAIL=you@example.com EMBEDDING_API_KEY=sk-... scripts/deploy.sh
+
+# Windows (PowerShell)
+$env:ALERT_EMAIL="you@example.com"; $env:EMBEDDING_API_KEY="sk-..."; scripts/deploy.ps1
+```
+
+Set `NODE_RG` / `NODE_FUNC` / `NODE_KV` (the mcp-node's resource group, function
+app, and Key Vault) to wire the node automatically; otherwise the script prints
+the exact wiring commands at the end.
 
 ## What it deploys
 
