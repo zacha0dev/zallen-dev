@@ -20,6 +20,8 @@ const jobs = require("./agents/jobs");
 const reasonerRunner = require("./agents/reasoner.runner");
 const trainerJobs = require("./agents/trainer-jobs");
 const trainerRunner = require("./agents/trainer.runner");
+const researcherRunner = require("./agents/researcher.runner");
+const drafterRunner = require("./agents/drafter.runner");
 const llm = require("./agents/llm");
 
 const PORT = Number(process.env.PORT || 8080);
