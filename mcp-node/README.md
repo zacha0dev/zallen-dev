@@ -52,6 +52,17 @@ unlock.
 After install you get a connect block. Step-by-step per client (Claude / ChatGPT
 / CLI): [Connecting a client](docs/connect.md).
 
+## Add the brains (the ai-stack extension)
+
+A node is useful on its own, but it is built to be extended. Stack
+[ai-stack](../ai-stack) on top of it to add a RAG data plane (Postgres +
+pgvector) and a set of agents (a reasoner/orchestrator, a trainer, and role
+agents like researcher and drafter, plus workflows). Once ai-stack is deployed
+and the node is pointed at it, the node discovers those agents from a manifest
+and serves them as tools automatically, with no node redeploy. See
+[../ai-stack](../ai-stack) to add it, and the node's own on-connect operating
+guide in [src/instructions.md](src/instructions.md).
+
 ## Docs
 
 [How it works](docs/) - concepts, architecture, auth, the server, tools,
