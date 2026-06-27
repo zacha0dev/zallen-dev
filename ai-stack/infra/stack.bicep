@@ -269,7 +269,7 @@ resource agentsApp 'Microsoft.App/containerApps@2024-03-01' = {
           name: 'agents'
           image: agentImage
           resources: { cpu: json('0.25'), memory: '0.5Gi' }
-          env: concat(agentEnv, [ { name: 'AGENT_ROLE', value: 'agents' } ])
+          env: concat(agentEnv, agentLlmEnv, [ { name: 'AGENT_ROLE', value: 'agents' } ])
         }
       ]
       scale: { minReplicas: 0, maxReplicas: 1 }
