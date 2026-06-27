@@ -65,6 +65,11 @@ function reasonerCtx() {
     llm,
     ragSearch: (args) => search(args),
     db: jobs,
+    // The dispatch seam resolves dispatch:"workflow:<name>" through ctx.workflows;
+    // wiring the Phase-5 registry here lets a reasoner task chain to a whole
+    // workflow (the tools surface rides along for a combined project-1+2 chain).
+    workflows: makeWorkflows(WORKFLOWS),
+    tools: workflowCtx().tools,
     logger: console,
   };
 }
