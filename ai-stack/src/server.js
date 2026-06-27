@@ -181,6 +181,28 @@ const server = http.createServer(async (req, res) => {
       trainerJobs.runDetached(jobId, input, trainerRunner, trainerCtx());
       return send(res, 202, { job_id: jobId, status: "pending" });
     }
+    if (url === "/agents/researcher") {
+      // Single-call worker: run inline + return the result directly (no 202 job).
+      if (!body.question || typeof body.question !== "string") {
+        return send(res, 400, { error: "question (string) is required" });
+      }
+      const out = await researcherRunner.run(
+        { question: body.question, depth: body.depth, topK: body.topK },
+        researcherCtx()
+      );
+      return send(res, 200, out);
+    }
+    if (url === "/agents/drafter") {
+      // Single-call worker: run inline + return the result directly (no 202 job).
+      if (body.context === undefined || typeof body.context !== "string") {
+        return send(res, 400, { error: "context (string) is required" });
+      }
+      const out = await drafterRunner.run(
+        { context: body.context, format: body.format, instruction: body.instruction },
+        drafterCtx()
+      );
+      return send(res, 200, out);
+    }
 
     return send(res, 404, { error: "not found" });
   } catch (err) {
