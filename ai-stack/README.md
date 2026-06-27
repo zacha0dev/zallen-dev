@@ -49,9 +49,17 @@ the exact wiring commands at the end.
 - **Ingest + embed** - the path that fills the vector store from the data sources.
 
 **Agent plane (Azure Container Apps):**
-- **System app** - the trainer and the manager/orchestrator agent.
-- **Agents app** - role-based agents; ships with two examples: a solution-architect
-  agent and a delivery/engagement agent.
+- **Reasoner (the orchestrator)** - grounds in the RAG store, dispatches to an
+  agent or a workflow, and gates every result before returning. Async-job:
+  `reasoner_run` / `reasoner_status`.
+- **Trainer** - the batch sibling that enriches a batch of training-context
+  nodes across the same 10 graded dimensions (the x10 enrichment framework).
+  Async-job: `trainer_run` / `trainer_status`.
+- **Role agents** - single-call workers, shipped as the copy-me templates:
+  **researcher** (`researcher_run`, grounded + cited) and **drafter**
+  (`drafter_run`, formatted generation).
+- **Workflows** - named, ordered chains that compose the workers (and, in the
+  combined pattern, a node tool): `workflow_run` / `workflow_list`.
 
 Plus Key Vault, a managed identity scoped to the resource group, Application
 Insights, a Basic Azure Container Registry (the image store `az acr build` builds
