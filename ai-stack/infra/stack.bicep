@@ -223,6 +223,8 @@ var agentLlmEnv = [
   { name: 'LLM_PROVIDER', value: llmProvider }
   { name: 'MODEL_REASONER', value: modelReasoner }
   { name: 'MODEL_CHECKER', value: modelChecker }
+  { name: 'MODEL_TRAINER', value: modelTrainer }
+  { name: 'MAX_BATCH_NODES', value: string(maxBatchNodes) }
 ]
 
 // ACR pull credentials, shared by every container app so they can pull the
