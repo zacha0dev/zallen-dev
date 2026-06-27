@@ -98,8 +98,9 @@ Swap models or lower the ceiling without a code change via those env knobs (plus
 
 ## Version
 
-v0.2 (RAG plane + the reasoner agent loop, async-persist, and the
-manifest-registration seam; agent container images are built out next)
+v0.5 (RAG plane, the reasoner orchestrator loop with async-persist, the trainer
+x10 enrichment batch, the researcher + drafter role agents, the workflow set
+including the combined project-1+2 pattern, and the manifest-registration seam)
 
 ---
 
