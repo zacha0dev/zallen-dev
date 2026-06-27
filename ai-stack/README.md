@@ -67,9 +67,10 @@ agents.
 ## Cost
 
 One resource group, one budget (default ~$25). Container Apps scale to zero, but
-Postgres Flexible has an hourly floor (it does not scale to zero like Functions),
-so the cap is set a bit higher than mcp-node's. The default uses the smallest
-Burstable Postgres tier; raise `monthlyCapUsd` deliberately if you scale up.
+two line items have a standing floor: Postgres Flexible (smallest Burstable tier,
+~$13/mo — it does not scale to zero like Functions) and the Basic Azure Container
+Registry that holds the container image (~$5/mo, a flat Basic-tier fee). Both sit
+under the default cap. Raise `monthlyCapUsd` deliberately if you scale up.
 
 The reasoner loop is bounded by `maxIterations` (default 3): at most 3 produce
 calls (model: `MODEL_REASONER`) plus a cheap grade each (`MODEL_CHECKER`,
