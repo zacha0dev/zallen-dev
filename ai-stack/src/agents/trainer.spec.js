@@ -87,7 +87,7 @@ const TRAINER_SPEC = {
   // calls). Overridable down via MAX_BATCH_NODES.
   maxBatchNodes: 50,
 
-  // The model tier for the ENRICH step (sonnet-class). The I-COST-1 knob:
+  // The model tier for the ENRICH step (sonnet-class). The cost knob:
   // MODEL_TRAINER swaps the tier without a code change.
   enricherModelEnv: "MODEL_TRAINER",
   defaultEnricherModel: "claude-sonnet-4-5",
