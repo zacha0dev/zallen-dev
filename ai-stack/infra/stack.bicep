@@ -65,6 +65,19 @@ param modelChecker string = 'claude-haiku-4-5'
 @description('Model tier for the TRAINER ENRICH step (Phase 3, the I-COST-1 knob). A sonnet-class model; swap it to cut enrichment cost without a code change.')
 param modelTrainer string = 'claude-sonnet-4-5'
 
+@description('Model tier for the RESEARCHER role agent (Phase 4 example role). Cheap Haiku-class default; the depth=deep flag promotes to Sonnet at call time. The I-COST-1 knob - lower it to cut research cost without a code change.')
+param modelResearcher string = 'claude-haiku-4-5'
+
+@description('Model tier for the DRAFTER role agent (Phase 4 example role). Cheap Haiku-class default; FORMAT_DEPTH=deep promotes to Sonnet. The I-COST-1 knob - lower it to cut drafting cost without a code change.')
+param modelDrafter string = 'claude-haiku-4-5'
+
+@description('Drafter depth (Phase 4): default | deep. deep promotes the drafter to its Sonnet-class tier for higher-quality generation.')
+@allowed([ 'default', 'deep' ])
+param formatDepth string = 'default'
+
+@description('The example role agents the agents Container App runs (Phase 4). Comma-separated; the two generalized examples are researcher + drafter. A deployer adds a forked role by appending its name here once its spec+runner+manifest entry ship.')
+param agentRoles string = 'researcher,drafter'
+
 @description('Max nodes the trainer processes in one batch run (the trainer cost ceiling). Worst-case run cost scales with this; lower it to cap spend per run.')
 param maxBatchNodes int = 50
 
