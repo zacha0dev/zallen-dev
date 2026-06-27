@@ -16,6 +16,8 @@ const { search } = require("./rag/search");
 const { TOOL_MANIFEST } = require("./agents/manifest");
 const jobs = require("./agents/jobs");
 const reasonerRunner = require("./agents/reasoner.runner");
+const trainerJobs = require("./agents/trainer-jobs");
+const trainerRunner = require("./agents/trainer.runner");
 const llm = require("./agents/llm");
 
 const PORT = Number(process.env.PORT || 8080);
