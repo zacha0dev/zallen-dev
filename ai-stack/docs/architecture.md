@@ -305,7 +305,12 @@ fallback.
 | `src/agents/trainer-jobs.js` | trainer async-persist (`trainer_jobs` + `enrichment_tracker`) |
 | `src/agents/trainer-matrix.spec.js` | the starter training matrix (kickstart) |
 | `src/agents/checker-calibration.js` | the 5-good/3-bad checker calibration set (kickstart) |
-| `src/agents/output-checker.js` | the shared two-stage gate (reasoner + trainer) |
+| `src/agents/researcher.spec.js` / `researcher.runner.js` | the RESEARCHER role agent (single-call, cite-or-drop, depth knob) |
+| `src/agents/drafter.spec.js` / `drafter.runner.js` | the DRAFTER role agent (pure generation, format + thin-context warning) |
+| `src/agents/{researcher,drafter}.examples.js` | per-role kickstart examples + smoke fixtures |
+| `src/agents/dispatch.js` | the reasoner's dispatch registry (role/workflow routing) |
+| `src/agents/role-agents.test.js` | mocked unit tests for the role agents + dispatch |
+| `src/agents/output-checker.js` | the shared two-stage gate (reasoner + trainer + role agents) |
 | `src/agents/jobs.js` | async-persist over `reasoner_jobs` |
 | `src/agents/manifest.js` | the `ToolManifest[]` served at `/mcp/tools` |
 | `src/agents/llm.js` | provider-agnostic chat client (no SDK) |
