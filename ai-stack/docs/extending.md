@@ -156,6 +156,44 @@ input set a deployer edits) and a checker calibration set
 (`checker-calibration.js`, known-good/known-bad cases to trust the gate before
 relying on its grades).
 
+## Variant — a single-call ROLE agent (RESEARCHER / DRAFTER, the copy-me templates)
+
+The reasoner LOOPS and the trainer BATCHES; the two Phase-4 **role agents** are
+the simplest shape — a **single-call WORKER**. They are the GENERALIZED templates
+to copy when you want "an agent that does one job well": **RESEARCHER**
+(`researcher.spec.js` + `researcher.runner.js`) and **DRAFTER** (`drafter.spec.js`
++ `drafter.runner.js`). Same SPEC + runner + ctx pattern; only the differences:
+
+1. **One call, no loop.** `run(input, ctx)` does survey→synthesize (researcher) or
+   just generate (drafter) and returns `{ status:"done", result, ... }`. There is
+   no produce→gate→retry loop, so there is no `maxIterations`. A worker either
+   answers or fails fast.
+2. **A SYNC route, not an async job.** In the manifest the entry has **no**
+   `route.async` and **no** status tool; in `server.js` the handler runs the
+   runner inline and `send(res, 200, out)` — the node's `dynamic.js` proxy returns
+   the body directly. (Copy the `/agents/researcher` handler, not the
+   `/agents/reasoner` 202 block.)
+3. **Two kickstart artifacts per role.** Ship `<name>.spec.js` (the editable
+   identity) **and** `<name>.examples.js` (sample input → expected-shape pairs).
+   The examples double as the SMOKE FIXTURE the unit test drives the runner with —
+   so the examples are exercised, not just documented (`assertShape` is the tiny
+   dependency-free shape checker each examples file exports).
+4. **Pick your tools via ctx.** RESEARCHER wires `ctx.ragSearch` (it grounds in
+   the store and `groundCitations` drops any citation not in the surveyed hits —
+   the anti-fabrication guard you copy if your role cites). DRAFTER wires only
+   `ctx.llm` (pure generation, no tools). The `MODEL_<NAME>` env knob + a depth/
+   format flag are how the tier is swapped without code.
+
+### Wiring a role into the reasoner's dispatch
+
+Roles are also reachable FROM the reasoner. `agents/dispatch.js` is the registry:
+add your role to `DEFAULT_ROLES` as `{ run, spec }` and the reasoner can hand off
+to it when a task carries `dispatch: "<yourrole>"` (the reasoner gates the
+dispatched result against your role's `outputSchema`). A "linked workflow" is the
+same shape under `ctx.workflows` with a `dispatch: "workflow:<name>"` directive —
+the seam Phase 5's workflow set fills in. With no `dispatch` field the reasoner
+produces directly, so adding a role never changes the default path.
+
 ## Build-test discipline (no live deploy)
 
 You validate an agent **without deploying** anything. Three checks:
