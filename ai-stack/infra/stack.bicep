@@ -50,6 +50,16 @@ param ragImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:la
 @allowed([ 'openai', 'azure', 'cohere' ])
 param embeddingProvider string = 'openai'
 
+@description('LLM provider for the agent plane (reasoner produce + output-checker grade): anthropic | openai. The matching API key (anthropic-api-key | openai-api-key) must be seeded into Key Vault before the reasoner works.')
+@allowed([ 'anthropic', 'openai' ])
+param llmProvider string = 'anthropic'
+
+@description('Model tier for the reasoner PRODUCE step (the I-COST-1 knob). Swap to a cheaper model to cut cost without a code change.')
+param modelReasoner string = 'claude-sonnet-4-5'
+
+@description('Model tier for the output-checker GRADE step. A cheap Haiku-class model keeps the gate inexpensive.')
+param modelChecker string = 'claude-haiku-4-5'
+
 @description('The mcp-node MCP URL this stack registers with (Project 1 control plane).')
 param mcpNodeUrl string = ''
 
