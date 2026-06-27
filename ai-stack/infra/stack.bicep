@@ -224,6 +224,10 @@ var agentEnv = [
   { name: 'PG_DATABASE', value: 'rag' }
   { name: 'PG_USER', value: pgAdminLogin }
   { name: 'DOCS_STORAGE_ACCOUNT', value: sa.name }
+  // MCP_NODE_URL - the project-1 (mcp-node) control plane. Phase 5: a COMBINED
+  // workflow (summarize_repo_file) calls the node's tools (github_get_file) at
+  // this URL via makeNodeToolCaller. Empty => project-2-only workflows still run;
+  // a combined workflow's tool step then fails with a clear "MCP_NODE_URL unset".
   { name: 'MCP_NODE_URL', value: mcpNodeUrl }
   { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: appInsights.properties.ConnectionString }
 ]
