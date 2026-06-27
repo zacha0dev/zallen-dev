@@ -233,12 +233,17 @@ fallback.
 | `src/server.js` | HTTP surface: health, manifest, rag, agent routes |
 | `src/rag/{ingest,search,embeddings}.js` | the RAG data plane |
 | `src/agents/reasoner.spec.js` | the reasoner SPEC (role, limits, schema, cost) |
-| `src/agents/reasoner.runner.js` | the bounded loop |
-| `src/agents/output-checker.js` | the shared two-stage gate |
+| `src/agents/reasoner.runner.js` | the bounded reasoner loop |
+| `src/agents/trainer.spec.js` | the trainer SPEC (10 dimensions, node shape, limits, cost) |
+| `src/agents/trainer.runner.js` | the batch x10 enrich→check→retry loop |
+| `src/agents/trainer-jobs.js` | trainer async-persist (`trainer_jobs` + `enrichment_tracker`) |
+| `src/agents/trainer-matrix.spec.js` | the starter training matrix (kickstart) |
+| `src/agents/checker-calibration.js` | the 5-good/3-bad checker calibration set (kickstart) |
+| `src/agents/output-checker.js` | the shared two-stage gate (reasoner + trainer) |
 | `src/agents/jobs.js` | async-persist over `reasoner_jobs` |
 | `src/agents/manifest.js` | the `ToolManifest[]` served at `/mcp/tools` |
 | `src/agents/llm.js` | provider-agnostic chat client (no SDK) |
-| `src/db/schema.sql` | `rag_chunks` + `reasoner_jobs` |
+| `src/db/schema.sql` | `rag_chunks` + `reasoner_jobs` + `trainer_jobs` + `enrichment_tracker` |
 | `infra/stack.bicep` | the whole resource group |
 | `mcp-node/src/tools/dynamic.js` | node-side manifest discovery + proxy tools |
 
