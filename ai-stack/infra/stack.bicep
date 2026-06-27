@@ -232,7 +232,8 @@ resource ragApp 'Microsoft.App/containerApps@2024-03-01' = {
   }
 }
 
-// System app - the trainer + manager/orchestrator agent.
+// System app - the trainer + manager/orchestrator agent. Gets the agent-plane LLM
+// settings so the Phase-3 trainer can reuse the output-checker.
 resource systemApp 'Microsoft.App/containerApps@2024-03-01' = {
   name: '${stackName}-system'
   location: location
@@ -246,7 +247,7 @@ resource systemApp 'Microsoft.App/containerApps@2024-03-01' = {
           name: 'system'
           image: agentImage
           resources: { cpu: json('0.25'), memory: '0.5Gi' }
-          env: concat(agentEnv, [ { name: 'AGENT_ROLE', value: 'system' } ])
+          env: concat(agentEnv, agentLlmEnv, [ { name: 'AGENT_ROLE', value: 'system' } ])
         }
       ]
       scale: { minReplicas: 0, maxReplicas: 1 }
