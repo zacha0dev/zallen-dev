@@ -2,8 +2,8 @@
 // surface (/mcp and /token). Single-tenant node, so an in-memory, per-instance
 // fixed-window lockout is enough; it makes bearer/secret brute-force expensive
 // on a warm instance. It is NOT a global ceiling (the Function App can scale
-// out), just a per-instance backstop. Mirrors the intent of the i2-ops
-// reference rate-limit.ts, kept minimal.
+// out), just a per-instance backstop. A minimal per-instance failed-auth
+// backstop.
 //
 // Safe by construction: only FAILED attempts are counted, and a success clears
 // the IP (recordAuthSuccess), so a valid caller is never throttled.
