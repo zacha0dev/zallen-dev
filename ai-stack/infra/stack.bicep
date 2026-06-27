@@ -278,7 +278,7 @@ resource agentsApp 'Microsoft.App/containerApps@2024-03-01' = {
 }
 
 // All three apps may read secrets from the vault (PG password, embedding key,
-// RAG bearer token).
+// LLM key, RAG bearer token).
 resource kvRag 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(kv.id, ragApp.id, kvSecretsUserRoleId)
   scope: kv
