@@ -204,8 +204,12 @@ fallback.
 ## Cost & safety model
 
 - **Bounded everything.** The reasoner can never exceed `maxIterations`
-  produce→gate cycles (hard-capped in the spec; an env override can only lower
-  it). A runaway loop is structurally impossible.
+  produce→gate cycles, and the trainer can never exceed `maxAttemptsPerNode`
+  per node × `maxBatchNodes` nodes (all hard-capped in the spec; an env override
+  can only lower them). A runaway loop is structurally impossible. The trainer
+  also runs a **free deterministic gate first** (deterministic schema/refusal +
+  its own dimension-completeness check) so a malformed enrich never reaches the
+  paid Haiku grade.
 - **Cheap-first gating.** Deterministic checks are free; the LLM grade (a
   Haiku-class model) runs only after they pass. The expensive produce model is
   the only costly call, and it is capped by `maxIterations`.
