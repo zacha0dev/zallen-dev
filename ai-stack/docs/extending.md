@@ -126,6 +126,36 @@ Every agent you add inherits the safety model **only if you keep the shape**:
 - expose a `MODEL_<NAME>` env knob so the tier is swappable without code;
 - declare a `costClass` so callers and budgets can reason about it.
 
+## Variant — a batch / training-style agent (how the trainer differs)
+
+The reasoner answers ONE task; the **trainer** (Phase 3) enriches a BATCH of
+nodes. If your agent is batch-shaped, the SPEC + runner + manifest + gate pattern
+is identical — only four things change, and the trainer is the worked example:
+
+1. **The SPEC carries a batch ceiling, not just a per-item one.** Alongside
+   `maxAttemptsPerNode` (the per-item loop cap), add `maxBatchNodes` (the per-run
+   cost ceiling) and a `resolveMaxBatchNodes()` env knob (`MAX_BATCH_NODES`),
+   hard-capped so env can only lower it. See `trainer.spec.js`.
+2. **`run(items, ctx)` loops over the batch and never throws on one bad item.**
+   Each item gets its own bounded attempt loop; a failed item is marked `failed`
+   and the batch continues. Return a `{ result: { items, summary }, iterations }`
+   shape so it still plugs into the async-persist job layer.
+3. **Per-item persistence is a second table.** Beyond the job envelope, write ONE
+   ROW PER ITEM (the trainer's `enrichment_tracker`, upserted via `ctx.db`) so
+   item-level results are queryable without unpacking the job blob.
+4. **Async-persist is a parallel path, not a rewrite.** Copy `jobs.js` to
+   `<name>-jobs.js` against your own tables rather than generalizing the shared
+   `jobs.js`/`reasoner_jobs` — the low-risk choice. (Collapse to one generic
+   `agent_jobs` table later if it earns its keep.)
+
+Everything else — the SPEC, gating through the shared `output-checker`, the
+manifest entry, the `MODEL_<NAME>` knob, the build-test discipline below — is the
+same. The trainer also ships two **kickstart artifacts** worth copying for any
+training-style agent: a starter matrix (`trainer-matrix.spec.js`, the example
+input set a deployer edits) and a checker calibration set
+(`checker-calibration.js`, known-good/known-bad cases to trust the gate before
+relying on its grades).
+
 ## Build-test discipline (no live deploy)
 
 You validate an agent **without deploying** anything. Three checks:
