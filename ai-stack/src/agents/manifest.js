@@ -66,6 +66,25 @@ const TOOL_MANIFEST = [
     costClass: "free",
     route: { method: "GET", path: "/agents/trainer/status" },
   },
+  {
+    // RESEARCHER (Phase 4) - a fast single-call worker, so it is a SYNCHRONOUS
+    // route (no route.async, no status tool): the handler runs the loop and
+    // returns the result directly. The node's dynamic.js proxy returns that body
+    // as-is. Contrast the reasoner/trainer above, which are async-job (202).
+    name: RESEARCHER_SPEC.name, // researcher_run
+    description: RESEARCHER_SPEC.role,
+    inputSchema: RESEARCHER_SPEC.inputSchema,
+    costClass: RESEARCHER_SPEC.costClass,
+    route: { method: "POST", path: "/agents/researcher" },
+  },
+  {
+    // DRAFTER (Phase 4) - also a fast single-call SYNC worker (no async/status).
+    name: DRAFTER_SPEC.name, // drafter_run
+    description: DRAFTER_SPEC.role,
+    inputSchema: DRAFTER_SPEC.inputSchema,
+    costClass: DRAFTER_SPEC.costClass,
+    route: { method: "POST", path: "/agents/drafter" },
+  },
 ];
 
 module.exports = { TOOL_MANIFEST };
