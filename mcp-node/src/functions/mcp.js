@@ -81,7 +81,7 @@ app.http("mcp", {
           return { status: 202, body: "" };
 
         case "tools/list":
-          return { status: 200, jsonBody: rpcResult(id, { tools: registry.list() }) };
+          return { status: 200, jsonBody: rpcResult(id, { tools: await registry.list() }) };
 
         case "tools/call": {
           const { name, arguments: args } = params || {};
