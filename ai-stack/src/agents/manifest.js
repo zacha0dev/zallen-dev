@@ -46,6 +46,24 @@ const TOOL_MANIFEST = [
     costClass: "free",
     route: { method: "GET", path: "/agents/reasoner/status" },
   },
+  {
+    name: TRAINER_SPEC.name, // trainer_run
+    description: TRAINER_SPEC.role,
+    inputSchema: TRAINER_SPEC.inputSchema,
+    costClass: TRAINER_SPEC.costClass,
+    route: { method: "POST", path: "/agents/trainer", async: true },
+  },
+  {
+    name: "trainer_status",
+    description: "Fetch the status + result (per-node grades) of a trainer batch job started by trainer_run.",
+    inputSchema: {
+      type: "object",
+      properties: { job_id: { type: "string", description: "The job id returned by trainer_run." } },
+      required: ["job_id"],
+    },
+    costClass: "free",
+    route: { method: "GET", path: "/agents/trainer/status" },
+  },
 ];
 
 module.exports = { TOOL_MANIFEST };
