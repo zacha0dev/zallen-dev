@@ -1,0 +1,163 @@
+[← ai-stack](../README.md)
+
+# Extending ai-stack — add your own agent
+
+This is the repeatable pattern. ai-stack is built so you add capability by
+**following a shape**, not by rewiring the system. An agent you add the right way
+is bounded, self-checking, async-persisted, and auto-discovered by the control
+plane — for free.
+
+Everything here is plain JavaScript (CommonJS), matches the existing files, and
+is **build-tested without a live deploy** (see the last section).
+
+## The pattern in one sentence
+
+> A new agent is a **SPEC** (data: who it is, how hard it may try, what a valid
+> result looks like, what it costs) plus a **runner** (a function that drives the
+> bounded loop), exposed in the **manifest** so the node auto-discovers it.
+
+## Step 1 — write the SPEC
+
+Create `src/agents/<name>.spec.js`. Copy `reasoner.spec.js` and change the data.
+A SPEC is declarative; it carries no logic:
+
+```js
+const MYAGENT_SPEC = {
+  name: "myagent_run",            // stable, snake_case; what the manifest advertises
+  role: "One sentence: what this agent does.",
+  maxIterations: 3,                // the hard loop ceiling (cost + safety cap)
+  modelEnv: "MODEL_MYAGENT",       // the I-COST-1 knob: swap the model via env
+  defaultModel: "claude-sonnet-4-5",
+  outputSchema: {                  // what a valid result looks like
+    type: "object",
+    required: ["answer"],
+    properties: { answer: { type: "string" } },
+  },
+  requireCitations: false,         // set true to force grounded, cited output
+  costClass: "moderate",           // free | cheap | moderate | expensive
+  inputSchema: {                   // what the agent accepts (advertised too)
+    type: "object",
+    properties: { task: { type: "string" } },
+    required: ["task"],
+  },
+};
+```
+
+Why a SPEC and not just code: the limits (`maxIterations`), the contract
+(`outputSchema`), and the cost (`costClass`) are **data the rest of the system
+reads** — the runner enforces them, the output-checker gates on them, the
+manifest advertises them. Keep them declarative and they stay honest.
+
+## Step 2 — write the runner
+
+Create `src/agents/<name>.runner.js`, exporting `run(task, ctx)`. The runner
+drives the bounded loop. The cheapest way is to copy `reasoner.runner.js` and
+change the **produce** step; the survey → gate → retry → DLQ scaffolding stays.
+
+`ctx` is the **injection seam** — everything the runner touches comes in through
+it, so the runner is unit-testable with fakes:
+
+```js
+ctx = {
+  llm,        // llm.complete({ system, prompt, model, maxTokens }) -> string
+  ragSearch,  // ({ query, topK }) -> { hits: [{ id, content, score }] }
+  db,         // the jobs persistence handle (markRunning/markDone/...)
+  logger,     // anything with .log (defaults to console)
+}
+```
+
+The loop shape every agent shares:
+
+```
+survey  → ctx.ragSearch(task)         (grounding evidence)
+dispatch→ pick a tool / sub-agent / linked workflow   ← your seam
+produce → ctx.llm.complete(...)        (the model call)
+gate    → check(task, output, opts, ctx)  ← the shared output-checker
+pass    → return { status:'done', result, iterations, attempts }
+fail    → feed verdict.structuredDiff back as the next correction
+ceiling → throw an error with err.dlq = true   (the jobs layer records DLQ)
+```
+
+**Always gate through `output-checker.check()`.** Do not hand-roll quality
+checks — you get the deterministic-first / cheap-grade discipline for free, and
+the trainer (Phase 3) understands the same verdict shape.
+
+## Step 3 — expose it in the manifest
+
+Add one entry to `src/agents/manifest.js`:
+
+```js
+{
+  name: MYAGENT_SPEC.name,
+  description: MYAGENT_SPEC.role,
+  inputSchema: MYAGENT_SPEC.inputSchema,
+  costClass: MYAGENT_SPEC.costClass,
+  route: { method: "POST", path: "/agents/myagent", async: true },
+}
+```
+
+…and add the matching route to `src/server.js` (copy the `/agents/reasoner`
+block: create a job, `runDetached`, return `202 { job_id }`). For a synchronous
+tool, return the result directly instead.
+
+That is the whole registration. The node's `tools/dynamic.js` fetches
+`GET /mcp/tools` on its next refresh (≤5 min) and registers your agent as a proxy
+tool. **No node redeploy** — the control plane discovers it.
+
+## Step 4 — add a tool or connection (optional)
+
+- **A new RAG-style data source / external connection:** read its key from Key
+  Vault via `lib/secrets.js` (`getSecret('<your-secret>')`) — never hard-code a
+  credential. Seed the secret into the vault at install time.
+- **A new model provider:** add it to `agents/llm.js`'s `PROVIDERS` map (key
+  secret name + a `complete*` function). Match the existing fetch-only pattern;
+  add no SDK.
+- **A new env knob:** add the param to `infra/stack.bicep`, thread it into
+  `agentLlmEnv` (or the app's `env`), and document it as an I-COST-1 knob if it
+  affects spend.
+
+## Step 5 — keep it bounded and cheap
+
+Every agent you add inherits the safety model **only if you keep the shape**:
+
+- a hard `maxIterations` in the SPEC (an env override may lower it, never raise);
+- gate through the output-checker (deterministic-first, cheap-grade);
+- one expensive model call per iteration, capped by `maxIterations`;
+- expose a `MODEL_<NAME>` env knob so the tier is swappable without code;
+- declare a `costClass` so callers and budgets can reason about it.
+
+## Build-test discipline (no live deploy)
+
+You validate an agent **without deploying** anything. Three checks:
+
+1. **Bicep compiles** (if you touched infra):
+   ```
+   bicep build ai-stack/infra/stack.bicep
+   ```
+   Exit 0 = the resource group still templates cleanly.
+
+2. **Syntax check every file you touched:**
+   ```
+   node --check ai-stack/src/agents/<name>.spec.js
+   node --check ai-stack/src/agents/<name>.runner.js
+   node --check ai-stack/src/server.js
+   ```
+
+3. **Mocked unit tests** — drive the runner with a fake `llm` and `ragSearch`
+   through `ctx`, no network, no DB, no real model. Copy
+   `agents/reasoner.runner.test.js` (plain-node `assert`, no test framework) and
+   assert the four behaviours every agent should have:
+   - passes on a first valid output,
+   - retries with the `structuredDiff` then passes,
+   - dead-letters after `maxIterations`,
+   - honors a graded fail after the deterministic gates pass.
+   ```
+   node ai-stack/src/agents/<name>.runner.test.js
+   ```
+
+When all three are green, the agent is correct by construction. Deploy is a
+separate, deliberate step — building and extending never requires it.
+
+---
+
+[zallen.dev](https://zallen.dev/) · [github.com/zacha0dev](https://github.com/zacha0dev)
