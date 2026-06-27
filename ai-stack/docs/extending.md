@@ -113,7 +113,7 @@ tool. **No node redeploy** — the control plane discovers it.
   secret name + a `complete*` function). Match the existing fetch-only pattern;
   add no SDK.
 - **A new env knob:** add the param to `infra/stack.bicep`, thread it into
-  `agentLlmEnv` (or the app's `env`), and document it as an I-COST-1 knob if it
+  `agentLlmEnv` (or the app's `env`), and document it as a cost knob if it
   affects spend.
 
 ## Step 5 — keep it bounded and cheap
