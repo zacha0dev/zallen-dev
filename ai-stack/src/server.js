@@ -74,6 +74,26 @@ function trainerCtx() {
   };
 }
 
+// The ctx the RESEARCHER (Phase 4) runs with: real llm + ragSearch + logger. The
+// researcher surveys RAG once, so ragSearch is wired (same shape the unit test
+// mocks). No db: the role agents are synchronous, they do not persist a job.
+function researcherCtx() {
+  return {
+    llm,
+    ragSearch: (args) => search(args),
+    logger: console,
+  };
+}
+
+// The ctx the DRAFTER (Phase 4) runs with: real llm + logger only. The drafter is
+// PURE GENERATION - it touches no tools, so no ragSearch is wired.
+function drafterCtx() {
+  return {
+    llm,
+    logger: console,
+  };
+}
+
 const server = http.createServer(async (req, res) => {
   try {
     const fullUrl = req.url || "";
