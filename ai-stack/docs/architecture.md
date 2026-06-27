@@ -31,6 +31,8 @@ asks a question" to "a checked, cited answer."
         │     POST /rag/search                     │
         │     POST /agents/reasoner  → 202 job_id  │
         │     GET  /agents/reasoner/status         │
+        │     POST /agents/trainer   → 202 job_id  │
+        │     GET  /agents/trainer/status          │
         └─────────────────────────────────────────┘
 ```
 
