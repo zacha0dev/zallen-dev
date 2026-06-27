@@ -10,6 +10,8 @@ const { REASONER_SPEC } = require("./reasoner.spec");
 const { TRAINER_SPEC } = require("./trainer.spec");
 const { RESEARCHER_SPEC } = require("./researcher.spec");
 const { DRAFTER_SPEC } = require("./drafter.spec");
+const { listWorkflows } = require("./workflows");
+const { WORKFLOWS } = require("./workflows.defs");
 
 const TOOL_MANIFEST = [
   {
