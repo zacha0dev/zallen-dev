@@ -249,6 +249,34 @@ const server = http.createServer(async (req, res) => {
       );
       return send(res, 200, out);
     }
+    if (url === "/agents/workflow") {
+      // Run a NAMED workflow from the SET. SYNC: the chained steps are themselves
+      // bounded single calls, so the whole run returns inline (a long workflow
+      // could later be promoted to the async-job envelope like the reasoner).
+      const name = body.name;
+      if (!name || typeof name !== "string") {
+        return send(res, 400, { error: "name (string) is required" });
+      }
+      const def = WORKFLOWS[name];
+      if (!def) {
+        return send(res, 404, {
+          error: `unknown workflow '${name}'`,
+          available: Object.keys(WORKFLOWS),
+        });
+      }
+      try {
+        const out = await runWorkflow(def, body.input || {}, workflowCtx());
+        return send(res, 200, out);
+      } catch (err) {
+        // A failing step surfaces cleanly: name the workflow + step + the trace.
+        return send(res, 502, {
+          error: String(err.message || err),
+          workflow: err.workflow || name,
+          step: err.step,
+          trace: err.trace,
+        });
+      }
+    }
 
     return send(res, 404, { error: "not found" });
   } catch (err) {
