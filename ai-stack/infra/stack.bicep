@@ -62,7 +62,7 @@ param modelReasoner string = 'claude-sonnet-4-5'
 @description('Model tier for the output-checker GRADE step. A cheap Haiku-class model keeps the gate inexpensive.')
 param modelChecker string = 'claude-haiku-4-5'
 
-@description('Model tier for the TRAINER ENRICH step (Phase 3, the I-COST-1 knob). A sonnet-class model; swap it to cut enrichment cost without a code change.')
+@description('Model tier for the TRAINER ENRICH step (Phase 3, a cost knob). A sonnet-class model; swap it to cut enrichment cost without a code change.')
 param modelTrainer string = 'claude-sonnet-4-5'
 
 @description('Model tier for the RESEARCHER role agent (Phase 4 example role). Cheap Haiku-class default; the depth=deep flag promotes to Sonnet at call time. The I-COST-1 knob - lower it to cut research cost without a code change.')
