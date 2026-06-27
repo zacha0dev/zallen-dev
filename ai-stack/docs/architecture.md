@@ -103,6 +103,63 @@ to fix, which the loop feeds into the next attempt.
 
 Return shape (stable): `{ pass, reason, structuredDiff, stage }`.
 
+## The trainer → x10 enrichment loop (Phase 3)
+
+The **trainer** is the batch sibling of the reasoner. Where the reasoner answers
+ONE task, the trainer takes a BATCH of training-context **nodes** and enriches
+each to a graded standard — the **x10 Multi-Node Enrichment Framework**: treat
+every training-context unit as a NODE and enrich each across the **same 10
+dimensions**, grading each dimension so the output is a comparable, auditable
+training corpus.
+
+The 10 dimensions (the contract, in `trainer.spec.js`):
+`factual_accuracy`, `source_cited`, `tone_consistency`, `schema_compliance`,
+`edge_case_coverage`, `conciseness`, `actionability`, `ambiguity_removed`,
+`cross_node_coherence`, `deployer_fit`.
+
+It follows the **same SPEC + runner pattern** as the reasoner and **reuses the
+same `output-checker`** — nothing about the gate is re-implemented:
+
+```
+  for each NODE (capped at MAX_BATCH_NODES):              ← the batch cost ceiling
+     attempt loop (≤ maxAttemptsPerNode = 2):
+        enrich   ── one Sonnet call across the 10 dims ──► { enrichments }
+           │
+           ▼
+        complete?── free, deterministic: one entry per dimension? ──┐ (trainer gate)
+           │                                                        │
+           ▼                                                        │
+        gate    ── output-checker.check() (SHARED) ────────────────┤
+           │        deterministic-first, then cheap Haiku grade     │
+           ▼                                                        │
+        pass? ──► node.status = done, persist                       │
+        fail? ──► feed the structuredDiff back, re-enrich ONCE ─────┘
+     ceiling ──► node.status = failed   (per-node dead-letter; the BATCH continues)
+     persist ──► upsert the node's enrichments + per-dimension grades
+                 to the enrichment_tracker (one row per node)
+```
+
+Two properties matter:
+
+- **A failed node never sinks the batch.** Each node has its own bounded attempt
+  loop; one bad unit is marked `failed` and the run proceeds, so a single
+  un-enrichable node can't fail the whole training set.
+- **Per-node persistence is independent of the job envelope.** `trainer_jobs`
+  holds the batch (status + summary); `enrichment_tracker` holds **one row per
+  node** keyed `(run_id, node_id)` with the per-dimension `enrichments` +
+  `grades` — so a deployer can query node-level quality without unpacking the job
+  blob, and a re-run upserts rather than duplicates.
+
+### Kickstart artifacts (the two the trainer ships)
+
+- **`trainer-matrix.spec.js`** — a `STARTER_MATRIX` of example enrichment nodes a
+  deployer edits for their domain, plus `toBatch()` to turn it into the
+  `POST /agents/trainer` payload.
+- **`checker-calibration.js`** — 5 known-good + 3 known-bad example outputs the
+  deployer runs (`node src/agents/checker-calibration.js`) to **trust the
+  output-checker before relying on its grades**. It reports per-case
+  agree/disagree and exits non-zero on a disagreement, so it doubles as a CI gate.
+
 ## Async-persist (sidestepping the timeout)
 
 The loop can take longer than an HTTP request should hold open (LLM calls × up to
