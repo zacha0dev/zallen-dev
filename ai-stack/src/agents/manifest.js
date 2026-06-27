@@ -87,6 +87,47 @@ const TOOL_MANIFEST = [
     costClass: DRAFTER_SPEC.costClass,
     route: { method: "POST", path: "/agents/drafter" },
   },
+  {
+    // WORKFLOWS (Phase 5) - run a NAMED, ORDERED chain of agent/tool steps. A
+    // workflow composes the single-call workers (researcher/drafter), the shared
+    // gate, and (for a combined pattern) a project-1 node tool. It is a SYNC route
+    // (the steps are themselves bounded single calls); a long workflow could be
+    // promoted to the async-job envelope later. The node proxies the body as-is.
+    name: "workflow_run",
+    description:
+      "Run a named workflow from the ai-stack set: an ordered chain of agent/tool " +
+      "steps whose outputs thread forward. Returns the final result + a per-step trace. " +
+      `Available: ${Object.keys(WORKFLOWS).join(", ")}.`,
+    inputSchema: {
+      type: "object",
+      properties: {
+        name: {
+          type: "string",
+          description: "The workflow to run.",
+          enum: Object.keys(WORKFLOWS),
+        },
+        input: {
+          type: "object",
+          description: "The workflow's top-level input (shape depends on the workflow; see workflow_list).",
+        },
+      },
+      required: ["name"],
+    },
+    costClass: "moderate", // sum of the chained steps' costs; each step is bounded.
+    route: { method: "POST", path: "/agents/workflow" },
+  },
+  {
+    name: "workflow_list",
+    description:
+      "List the available ai-stack workflows: each name, description, and its ordered step shape.",
+    inputSchema: { type: "object", properties: {} },
+    costClass: "free",
+    route: { method: "GET", path: "/agents/workflow/list" },
+  },
 ];
+
+// Surface the workflow set in the module for callers that want the metadata
+// without an HTTP round-trip (server.js's list route returns this).
+const WORKFLOW_LIST = listWorkflows(WORKFLOWS);
 
 module.exports = { TOOL_MANIFEST };
