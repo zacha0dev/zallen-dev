@@ -24,6 +24,10 @@ const trainerJobs = require("./agents/trainer-jobs");
 const trainerRunner = require("./agents/trainer.runner");
 const researcherRunner = require("./agents/researcher.runner");
 const drafterRunner = require("./agents/drafter.runner");
+const { runWorkflow, makeWorkflows, makeNodeToolCaller } = require("./agents/workflows");
+const { WORKFLOWS } = require("./agents/workflows.defs");
+const { WORKFLOW_LIST } = require("./agents/manifest");
+const { getSecret } = require("./lib/secrets");
 const llm = require("./agents/llm");
 
 const PORT = Number(process.env.PORT || 8080);
