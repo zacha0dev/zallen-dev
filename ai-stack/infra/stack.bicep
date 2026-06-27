@@ -274,7 +274,8 @@ resource ragApp 'Microsoft.App/containerApps@2024-03-01' = {
 }
 
 // System app - the trainer + manager/orchestrator agent. Gets the agent-plane LLM
-// settings so the Phase-3 trainer can reuse the output-checker.
+// settings so the Phase-3 trainer can reuse the output-checker and read its
+// MODEL_TRAINER + MAX_BATCH_NODES knobs.
 resource systemApp 'Microsoft.App/containerApps@2024-03-01' = {
   name: '${stackName}-system'
   location: location
