@@ -130,4 +130,4 @@ const TOOL_MANIFEST = [
 // without an HTTP round-trip (server.js's list route returns this).
 const WORKFLOW_LIST = listWorkflows(WORKFLOWS);
 
-module.exports = { TOOL_MANIFEST };
+module.exports = { TOOL_MANIFEST, WORKFLOW_LIST };
