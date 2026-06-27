@@ -33,6 +33,10 @@ asks a question" to "a checked, cited answer."
         │     GET  /agents/reasoner/status         │
         │     POST /agents/trainer   → 202 job_id  │
         │     GET  /agents/trainer/status          │
+        │     POST /agents/researcher  (sync)      │
+        │     POST /agents/drafter     (sync)      │
+        │     POST /agents/workflow    (sync)      │
+        │     GET  /agents/workflow/list           │
         └─────────────────────────────────────────┘
 ```
 
