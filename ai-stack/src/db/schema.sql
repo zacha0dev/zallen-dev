@@ -55,3 +55,31 @@ AS $$
   ORDER BY score DESC
   LIMIT match_count;
 $$;
+
+-- ---------------------------------------------------------------------------
+-- Phase 2: the agent plane's async-persist queue.
+--
+-- reasoner_jobs - one row per agent run. The reasoner loop can outlast an HTTP
+-- request (LLM calls x up to maxIterations), so POST /agents/reasoner returns
+-- 202 + job_id and the work runs detached, writing here; GET .../status reads
+-- the row back. Lifecycle: pending -> running -> done | dlq | error.
+--   task    - the input { task, topK } the job was created with
+--   result  - the gated { answer, citations } once status = done
+--   error   - the failure message when status = dlq (loop ceiling) or error
+--   iterations - how many produce->gate cycles the loop ran
+CREATE TABLE IF NOT EXISTS reasoner_jobs (
+  id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  status     text NOT NULL DEFAULT 'pending'
+             CHECK (status IN ('pending', 'running', 'done', 'dlq', 'error')),
+  task       jsonb NOT NULL,
+  result     jsonb,
+  error      text,
+  iterations int,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- Index for sweeping by status (e.g. a future reaper finding stuck 'running'
+-- jobs, or listing the DLQ for inspection).
+CREATE INDEX IF NOT EXISTS reasoner_jobs_status_idx
+  ON reasoner_jobs (status, created_at DESC);
