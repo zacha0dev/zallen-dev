@@ -327,6 +327,7 @@ resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
 output postgresHost string = pg.properties.fullyQualifiedDomainName
 output ragDatabase string = 'rag'
 output ragServiceUrl string = 'https://${ragApp.properties.configuration.ingress.fqdn}'
+output toolsManifestUrl string = 'https://${ragApp.properties.configuration.ingress.fqdn}/mcp/tools'
 output storageAccount string = sa.name
 output keyVaultName string = kv.name
 output systemAppName string = systemApp.name
