@@ -238,6 +238,9 @@ var agentLlmEnv = [
   { name: 'MODEL_REASONER', value: modelReasoner }
   { name: 'MODEL_CHECKER', value: modelChecker }
   { name: 'MODEL_TRAINER', value: modelTrainer }
+  { name: 'MODEL_RESEARCHER', value: modelResearcher }
+  { name: 'MODEL_DRAFTER', value: modelDrafter }
+  { name: 'FORMAT_DEPTH', value: formatDepth }
   { name: 'MAX_BATCH_NODES', value: string(maxBatchNodes) }
 ]
 
