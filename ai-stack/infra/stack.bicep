@@ -195,9 +195,19 @@ var agentEnv = [
   { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: appInsights.properties.ConnectionString }
 ]
 
-// RAG search service - the data-plane HTTP surface (/rag/ingest, /rag/search).
-// External ingress so the mcp-node's rag_search tool can reach it; it is bearer-
-// protected (rag-bearer-token) at the app layer.
+// Agent-plane settings shared by every app that runs the reasoner loop (the RAG
+// app serves /agents/reasoner; the system app reuses the same checker in Phase 3).
+// LLM_PROVIDER + the two model tiers are the I-COST-1 knobs - change them here to
+// swap models or cut cost without a code change.
+var agentLlmEnv = [
+  { name: 'LLM_PROVIDER', value: llmProvider }
+  { name: 'MODEL_REASONER', value: modelReasoner }
+  { name: 'MODEL_CHECKER', value: modelChecker }
+]
+
+// RAG search service - the data-plane HTTP surface (/rag/ingest, /rag/search) AND
+// the agent surface (/agents/reasoner, /mcp/tools). External ingress so the
+// mcp-node can reach it; bearer-protected (rag-bearer-token) at the app layer.
 resource ragApp 'Microsoft.App/containerApps@2024-03-01' = {
   name: '${stackName}-rag'
   location: location
@@ -211,7 +221,7 @@ resource ragApp 'Microsoft.App/containerApps@2024-03-01' = {
           name: 'rag'
           image: ragImage
           resources: { cpu: json('0.25'), memory: '0.5Gi' }
-          env: concat(agentEnv, [
+          env: concat(agentEnv, agentLlmEnv, [
             { name: 'EMBEDDING_PROVIDER', value: embeddingProvider }
             { name: 'PORT', value: '8080' }
           ])
