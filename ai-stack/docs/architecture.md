@@ -241,6 +241,101 @@ an **`*.examples.js`** (sample input → expected-shape pairs that double as the
 smoke fixtures the unit test drives the runner with). Fork a role = copy the spec,
 edit the identity, copy the examples, run the build-tests.
 
+## The workflow set (Phase 5)
+
+Where the reasoner LOOPS, the trainer BATCHES, and the role agents are single
+WORKERS, a **workflow** is a **named, ordered chain of steps** — the way you
+compose the workers into a task. A workflow runs **singly** (one named chain) or
+**composed** (a step, or the reasoner, chains to another workflow), and a step
+can call a PROJECT-2 agent, an inline function, or a PROJECT-1 node tool — which
+is how a workflow combines both projects.
+
+The engine (`agents/workflows.js`) is deliberately **linear + simple** — no graph
+engine, no branching, no parallel fan-out. A definition is:
+
+```
+{ name, description, steps: [ { id, run|agent|tool, inputFrom?, with? }, ... ] }
+```
+
+and `runWorkflow(def, input, ctx)` executes the steps in order, **threading each
+step's output forward**, returning the stable envelope:
+
+```
+{ status:"done", workflow, result, outputs, trace }
+   result  = the LAST step's output (the workflow's product)
+   outputs = { <stepId>: output }   the threaded surface a later step reads
+   trace   = [{ id, kind, name, ok, ms }]   one entry per step (observability)
+```
+
+A STEP is exactly ONE of:
+
+| kind | step field | what it calls |
+|---|---|---|
+| inline | `run: async (input, {ctx,outputs,step}) => out` | any function (e.g. the shared gate) |
+| agent | `agent: "researcher" \| "drafter" \| <ctx.roles name>` | a PROJECT-2 role agent |
+| tool | `tool: "github_get_file" \| <ctx.tools name>` | a PROJECT-1 node tool |
+
+`inputFrom` is the output thread: omit it to receive the workflow input, give a
+`"<stepId>"` to receive that prior step's output, or a `(outputs, input) => any`
+**mapper** to reshape between steps (the general case). `ctx` is the same
+injection seam the agents use (`llm`, `ragSearch`, `roles`, `tools`, `logger`),
+so a workflow is unit-testable with mocked agents/tools. A **failing step
+surfaces cleanly** — the thrown error carries `.workflow`, `.step`, and the
+partial `.trace`, so the caller knows exactly where the chain broke.
+
+```
+POST /agents/workflow      { name, input }  → 200 { status, workflow, result, outputs, trace }
+GET  /agents/workflow/list                  → 200 { workflows: [...] }   (name + step shape)
+```
+
+Both are advertised in the manifest as `workflow_run` + `workflow_list`, so the
+node auto-discovers them like any other tool. The route is **SYNC** (the chained
+steps are themselves bounded single calls); a long workflow could later be
+promoted to the async-job envelope the reasoner uses.
+
+### The example SET (the copy-me artifact)
+
+`agents/workflows.defs.js` ships three generalized workflows — each a small,
+editable demonstration of one composition pattern:
+
+| Workflow | Pattern | Chain |
+|---|---|---|
+| `research_and_draft` | PROJECT-2 | RESEARCHER (grounded, cited) → DRAFTER (finished doc) |
+| `enrich_and_check` | PROJECT-2 | DRAFTER → the shared `output-checker` gate (an inline step) |
+| `summarize_repo_file` | **COMBINED 1+2** | `github_get_file` (node tool) → DRAFTER (summary) |
+
+`agents/workflows.examples.js` pairs with the defs (sample input → expected run
+shape) and **doubles as the smoke fixture** the unit test drives the engine with
+— so the examples are exercised, not just documented (same pattern as the role
+agents' `*.examples.js`).
+
+### The combined 1+2 pattern (how ai-stack reaches a node tool)
+
+`summarize_repo_file` is the cross-project example: it fetches a repo file with
+the NODE's `github_get_file` (PROJECT 1), then summarizes it with DRAFTER
+(PROJECT 2). The seam is **`ctx.tools`** — a `tool` step calls
+`ctx.tools[name](args)`. In production `server.js` wires that to
+`makeNodeToolCaller`, an adapter that POSTs an MCP-style `{ name, arguments }`
+envelope to **`MCP_NODE_URL`** with the node bearer (read from Key Vault per
+call). It is **opt-in**: if `MCP_NODE_URL` is unset, a project-2-only workflow is
+unaffected, and a combined workflow's tool step throws a clear "MCP_NODE_URL
+unset" only when it actually runs. (A deployer whose node speaks a different
+protocol swaps that one function.) In a unit test `ctx.tools` is just a stub map,
+so the combined pattern is exercised with no node at all.
+
+```
+POST /agents/workflow {name:"summarize_repo_file", input:{repo,path}}
+   │
+   ▼  step "fetch"  (tool)  ── ctx.tools.github_get_file ──► node /  (MCP_NODE_URL, bearer)
+   │                                                          returns { content, encoding }
+   ▼  step "draft"  (agent) ── DRAFTER over the decoded file ──► { draft, ... }
+   └─► { result: <draft>, outputs:{ fetch, draft }, trace:[...] }
+```
+
+The reasoner can also chain to a whole workflow: a task with
+`dispatch: "workflow:<name>"` resolves through `ctx.workflows` (the registry
+`makeWorkflows(WORKFLOWS)` builds) — the Phase-4 dispatch seam, now filled in.
+
 ## The manifest-registration seam
 
 This is what makes the system extensible without redeploying the node.
