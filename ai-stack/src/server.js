@@ -187,6 +187,11 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, { job });
     }
 
+    // GET /agents/workflow/list - the available workflows + their step shape.
+    if (req.method === "GET" && url === "/agents/workflow/list") {
+      return send(res, 200, { workflows: WORKFLOW_LIST });
+    }
+
     if (req.method !== "POST") {
       return send(res, 405, { error: "method not allowed" });
     }
